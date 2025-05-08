@@ -4,8 +4,8 @@ class Plant {
   final String commonName;
   final String family;
   final double probability;
-  final String imageUrl;
-  final List<String> similarImages;
+  final String imageUrl; // Will be empty (not available in response)
+  final List<String> similarImages; // Will be empty (not available in response)
   final String description;
 
   Plant({
@@ -20,29 +20,22 @@ class Plant {
   });
 
   factory Plant.fromJson(Map<String, dynamic> json) {
-    List<String> similarImagesUrls = [];
-    if (json['images'] != null) {
-      similarImagesUrls =
-          (json['images'] as List<dynamic>)
-              .map((img) => img['url'].toString())
-              .toList();
-    }
+    final species = json['species'] as Map<String, dynamic>? ?? {};
+    final gbif = json['gbif'] as Map<String, dynamic>? ?? {};
 
     return Plant(
-      id: json['gbif']?.toString() ?? '',
-      scientificName: json['scientificName'] ?? '',
+      id: gbif['id']?.toString() ?? '', // Extract from nested gbif.id
+      scientificName: species['scientificNameWithoutAuthor'] ?? '',
       commonName:
-          json['commonNames']?.isNotEmpty == true
-              ? json['commonNames'][0]
-              : json['scientificName'] ?? '',
-      family:
-          json['family'] != null ? json['family']['scientificName'] ?? '' : '',
+          species['commonNames']?.isNotEmpty == true
+              ? species['commonNames'][0]
+              : species['scientificNameWithoutAuthor'] ?? '',
+      family: species['family']?['scientificNameWithoutAuthor'] ?? '',
       probability:
           json['score'] != null ? (json['score'] as num).toDouble() : 0.0,
-      imageUrl:
-          json['images']?.isNotEmpty == true ? json['images'][0]['url'] : '',
-      similarImages: similarImagesUrls,
-      description: json['description'] ?? '',
+      imageUrl: '', // Not available in the response (query.images is separate)
+      similarImages: [], // Not available in the response
+      description: '', // Not available in the response
     );
   }
 

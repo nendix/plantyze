@@ -35,8 +35,8 @@ class IdentificationResult {
       queryCapturedImage: capturedImagePath,
       language: json['language'] ?? 'en',
       identifiedAt: DateTime.now(),
-      isSuccessful: json['results'] != null,
-      errorMessage: json['error'] != null ? json['error']['message'] : null,
+      isSuccessful: plantResults.isNotEmpty, // More accurate check
+      errorMessage: null, // Your API response doesn't include error messages
     );
   }
 
