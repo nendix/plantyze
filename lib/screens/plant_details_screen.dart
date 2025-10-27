@@ -100,7 +100,7 @@ class PlantDetailsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(plant.family, style: const TextStyle(fontSize: 18)),
+          Text(plant.family.scientificNameWithoutAuthor, style: const TextStyle(fontSize: 18)),
 
           const Divider(height: 32),
 

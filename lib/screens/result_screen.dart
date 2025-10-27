@@ -17,10 +17,7 @@ class ResultScreen extends StatelessWidget {
         title: const Text('Identification Results'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed:
-              () => Navigator.of(
-                context,
-              ).pushNamedAndRemoveUntil('/', (route) => false),
+          onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body:

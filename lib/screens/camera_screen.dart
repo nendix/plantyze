@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
 import 'package:plantyze/services/camera_service.dart';
 import 'package:plantyze/services/plant_api_service.dart';
 import 'package:plantyze/screens/result_screen.dart';
@@ -168,7 +167,7 @@ class _CameraScreenState extends State<CameraScreen>
                     height: 80,
                     width: 80,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white, width: 4),
                     ),
@@ -199,7 +198,7 @@ class _CameraScreenState extends State<CameraScreen>
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.black.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: const Text(
