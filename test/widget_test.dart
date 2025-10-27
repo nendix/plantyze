@@ -7,24 +7,29 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:plantyze/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  setUpAll(() async {
+    // Initialize dotenv for tests
+    dotenv.testLoad(fileInput: '''
+PLANTNET_API_KEY=test_key
+''');
+  });
+
+  testWidgets('App starts with home screen', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(const PlantyzeApp());
+    await tester.pump(); // Allow the app to settle
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify that the home screen is displayed
+    expect(find.text('Plantyze'), findsOneWidget);
+    expect(find.text('Discover Plants Around You'), findsOneWidget);
+    expect(find.text('Take Photo'), findsOneWidget);
+    expect(find.text('Choose from Gallery'), findsOneWidget);
+    expect(find.byIcon(Icons.camera_alt), findsOneWidget);
+    expect(find.byIcon(Icons.photo_library), findsOneWidget);
   });
 }
