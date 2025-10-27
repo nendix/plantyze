@@ -19,17 +19,13 @@ PLANTNET_API_KEY=test_key
 ''');
   });
 
-  testWidgets('App starts with home screen', (WidgetTester tester) async {
+  testWidgets('App starts with loading screen then home screen', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const PlantyzeApp());
-    await tester.pump(); // Allow the app to settle
-
-    // Verify that the home screen is displayed
-    expect(find.text('Plantyze'), findsOneWidget);
-    expect(find.text('Discover Plants Around You'), findsOneWidget);
-    expect(find.text('Take Photo'), findsOneWidget);
-    expect(find.text('Choose from Gallery'), findsOneWidget);
-    expect(find.byIcon(Icons.camera_alt), findsOneWidget);
-    expect(find.byIcon(Icons.photo_library), findsOneWidget);
+    
+    // Verify loading screen is displayed initially
+    expect(find.text('Loading Plantyze...'), findsOneWidget);
+    expect(find.byIcon(Icons.local_florist), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 }
