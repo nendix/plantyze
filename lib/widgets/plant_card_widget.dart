@@ -93,21 +93,7 @@ class PlantCardWidget extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        _buildConfidenceBadge(context),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Family: ${plant.family}',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.black54,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
+                    Row(children: [_buildConfidenceBadge(context)]),
                   ],
                 ),
               ),
