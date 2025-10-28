@@ -83,14 +83,14 @@ class ThemeConfig {
         scrolledUnderElevation: 2,
         shadowColor: AppColors.lightShadow,
         surfaceTintColor: AppColors.lightPrimary,
-        titleTextStyle: const TextStyle(
+        titleTextStyle: TextStyle(
           fontFamily: 'Poppins',
           fontWeight: FontWeight.w600,
           fontSize: 22,
           letterSpacing: 0.5,
           color: Colors.white,
         ),
-        iconTheme: const IconThemeData(
+        iconTheme: IconThemeData(
           color: Colors.white,
           size: 24,
         ),
@@ -226,7 +226,7 @@ class ThemeConfig {
       // Bottom sheet theme
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: AppColors.lightSurface,
-        shape: const RoundedRectangleBorder(
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         elevation: 8,
@@ -284,14 +284,14 @@ class ThemeConfig {
         scrolledUnderElevation: 2,
         shadowColor: AppColors.darkShadow,
         surfaceTintColor: AppColors.darkPrimary,
-        titleTextStyle: const TextStyle(
+        titleTextStyle: TextStyle(
           fontFamily: 'Poppins',
           fontWeight: FontWeight.w600,
           fontSize: 22,
           letterSpacing: 0.5,
           color: AppColors.darkOnBackground,
         ),
-        iconTheme: const IconThemeData(
+        iconTheme: IconThemeData(
           color: AppColors.darkPrimary,
           size: 24,
         ),
@@ -427,7 +427,7 @@ class ThemeConfig {
       // Dark bottom sheet theme
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: AppColors.darkSurface,
-        shape: const RoundedRectangleBorder(
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         elevation: 12,
