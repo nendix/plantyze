@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:plantyze/screens/main_navigation_screen.dart';
+import 'package:plantyze/screens/base_screen.dart';
+import 'package:plantyze/screens/garden_screen.dart';
+import 'package:plantyze/screens/camera_screen.dart';
+import 'package:plantyze/screens/settings_screen.dart';
 import 'package:plantyze/services/theme_service.dart';
 import 'package:plantyze/services/garden_service.dart';
 import 'package:plantyze/services/camera_service.dart';
@@ -12,105 +15,81 @@ import 'package:plantyze/config/theme_config.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment variables from .env file
   await dotenv.load(fileName: ".env");
 
-  // Set preferred orientations
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 
-  runApp(const PlantyzeApp());
+  final themeService = ThemeService();
+  final gardenService = GardenService();
+
+  await Future.wait([
+    themeService.initialize(),
+    gardenService.initialize(),
+  ]);
+
+  final cameraService = CameraService();
+  final connectivityService = ConnectivityService();
+  final plantApiService = PlantApiService(connectivityService: connectivityService);
+
+  runApp(PlantyzeApp(
+    themeService: themeService,
+    gardenService: gardenService,
+    cameraService: cameraService,
+    plantApiService: plantApiService,
+  ));
 }
 
 class PlantyzeApp extends StatefulWidget {
-  const PlantyzeApp({super.key});
+  final ThemeService themeService;
+  final GardenService gardenService;
+  final CameraService cameraService;
+  final PlantApiService plantApiService;
+
+  const PlantyzeApp({
+    super.key,
+    required this.themeService,
+    required this.gardenService,
+    required this.cameraService,
+    required this.plantApiService,
+  });
 
   @override
   State<PlantyzeApp> createState() => _PlantyzeAppState();
 }
 
 class _PlantyzeAppState extends State<PlantyzeApp> {
-  late ThemeService _themeService;
-  late GardenService _gardenService;
-  late CameraService _cameraService;
-  late PlantApiService _plantApiService;
-  late ConnectivityService _connectivityService;
-  bool _isInitialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeServices();
-  }
-
-  Future<void> _initializeServices() async {
-    _themeService = ThemeService();
-    _gardenService = GardenService();
-    _cameraService = CameraService();
-    _connectivityService = ConnectivityService();
-    _plantApiService = PlantApiService(connectivityService: _connectivityService);
-    
-    // Initialize services that need async initialization
-    await Future.wait([
-      _themeService.initialize(),
-      _gardenService.initialize(),
-    ]);
-    
-    if (mounted) {
-      setState(() {
-        _isInitialized = true;
-      });
-    }
-  }
-
   @override
   void dispose() {
-    // Clean up camera service when app is disposed
-    _cameraService.dispose();
+    widget.cameraService.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_isInitialized) {
-      return MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.local_florist,
-                  size: 64,
-                  color: Colors.green[600],
-                ),
-                const SizedBox(height: 16),
-                const CircularProgressIndicator(),
-                const SizedBox(height: 16),
-                const Text('Loading Plantyze...'),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
     return ListenableBuilder(
-      listenable: _themeService,
+      listenable: widget.themeService,
       builder: (context, child) {
         return MaterialApp(
           title: 'Plantyze',
           debugShowCheckedModeBanner: false,
           theme: ThemeConfig.lightTheme,
           darkTheme: ThemeConfig.darkTheme,
-          themeMode: _themeService.materialThemeMode,
-          home: MainNavigationScreen(
-            themeService: _themeService,
-            gardenService: _gardenService,
-            cameraService: _cameraService,
-            plantApiService: _plantApiService,
+          themeMode: widget.themeService.materialThemeMode,
+          home: BaseScreen(
+            screens: [
+              GardenScreen(
+                gardenService: widget.gardenService,
+              ),
+              CameraScreen(
+                gardenService: widget.gardenService,
+                cameraService: widget.cameraService,
+                plantApiService: widget.plantApiService,
+              ),
+              SettingsScreen(themeService: widget.themeService),
+            ],
           ),
         );
       },
