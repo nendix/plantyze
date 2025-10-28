@@ -6,6 +6,7 @@ import 'package:plantyze/services/theme_service.dart';
 import 'package:plantyze/services/garden_service.dart';
 import 'package:plantyze/services/camera_service.dart';
 import 'package:plantyze/services/plant_api_service.dart';
+import 'package:plantyze/services/connectivity_service.dart';
 import 'package:plantyze/config/theme_config.dart';
 
 void main() async {
@@ -35,6 +36,7 @@ class _PlantyzeAppState extends State<PlantyzeApp> {
   late GardenService _gardenService;
   late CameraService _cameraService;
   late PlantApiService _plantApiService;
+  late ConnectivityService _connectivityService;
   bool _isInitialized = false;
 
   @override
@@ -47,7 +49,8 @@ class _PlantyzeAppState extends State<PlantyzeApp> {
     _themeService = ThemeService();
     _gardenService = GardenService();
     _cameraService = CameraService();
-    _plantApiService = PlantApiService();
+    _connectivityService = ConnectivityService();
+    _plantApiService = PlantApiService(connectivityService: _connectivityService);
     
     // Initialize services that need async initialization
     await Future.wait([

@@ -5,8 +5,14 @@ import 'package:plantyze/config/api_config.dart';
 import 'package:plantyze/models/identification_result.dart';
 import 'package:plantyze/constants/app_constants.dart';
 import 'package:plantyze/utils/validators.dart';
+import 'package:plantyze/services/connectivity_service.dart';
 
 class PlantApiService {
+  final ConnectivityService _connectivityService;
+
+  PlantApiService({ConnectivityService? connectivityService})
+      : _connectivityService = connectivityService ?? ConnectivityService();
+
   /// Identifies a single plant from an image using auto-detection
   Future<IdentificationResult> identifyPlant(
     String imagePath, {
@@ -18,6 +24,15 @@ class PlantApiService {
     bool detailed = false,
   }) async {
     try {
+      // Check internet connectivity first
+      final hasConnection = await _connectivityService.hasInternetConnection();
+      if (!hasConnection) {
+        return IdentificationResult.error(
+          'No internet connection. Please check your network and try again.',
+          imagePath,
+        );
+      }
+
       // Validate inputs
       final validationResult = _validateInputs(imagePath);
       if (!validationResult.isValid) {
