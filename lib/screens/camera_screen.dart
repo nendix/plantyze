@@ -1,13 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:plantyze/services/camera_service.dart';
 import 'package:plantyze/services/plant_api_service.dart';
+import 'package:plantyze/services/garden_service.dart';
 import 'package:plantyze/screens/result_screen.dart';
 import 'package:plantyze/utils/image_utils.dart';
 import 'package:plantyze/widgets/camera_preview_widget.dart';
-import 'package:plantyze/widgets/loading_indicator.dart';
 
 class CameraScreen extends StatefulWidget {
-  const CameraScreen({super.key});
+  final GardenService gardenService;
+  final CameraService cameraService;
+  final PlantApiService plantApiService;
+  final VoidCallback? onNavigateToGarden;
+
+  const CameraScreen({
+    super.key,
+    required this.gardenService,
+    required this.cameraService,
+    required this.plantApiService,
+    this.onNavigateToGarden,
+  });
 
   @override
   State<CameraScreen> createState() => _CameraScreenState();
@@ -15,8 +27,8 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen>
     with WidgetsBindingObserver {
-  final CameraService _cameraService = CameraService();
-  final PlantApiService _plantApiService = PlantApiService();
+  late CameraService _cameraService;
+  late PlantApiService _plantApiService;
   bool _isInitialized = false;
   bool _isCapturing = false;
   bool _isFlashOn = false;
@@ -24,6 +36,9 @@ class _CameraScreenState extends State<CameraScreen>
   @override
   void initState() {
     super.initState();
+    // Use the injected services
+    _cameraService = widget.cameraService;
+    _plantApiService = widget.plantApiService;
     WidgetsBinding.instance.addObserver(this);
     _initializeCamera();
   }
@@ -31,23 +46,36 @@ class _CameraScreenState extends State<CameraScreen>
   Future<void> _initializeCamera() async {
     try {
       await _cameraService.initialize();
-      setState(() {
-        _isInitialized = true;
-      });
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+      }
     } catch (e) {
-      _showErrorDialog('Camera initialization failed: ${e.toString()}');
+      // Ensure camera service is disposed if initialization fails
+      await _cameraService.dispose();
+      if (mounted) {
+        setState(() {
+          _isInitialized = false;
+        });
+        _showErrorDialog('Camera initialization failed: ${e.toString()}');
+      }
     }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     // Handle app lifecycle changes
-    if (!_isInitialized || _cameraService.controller == null) return;
-
     if (state == AppLifecycleState.inactive) {
+      // Always dispose when app goes inactive, regardless of initialization state
       _cameraService.dispose();
-      _isInitialized = false;
-    } else if (state == AppLifecycleState.resumed) {
+      if (mounted) {
+        setState(() {
+          _isInitialized = false;
+        });
+      }
+    } else if (state == AppLifecycleState.resumed && !_isInitialized) {
+      // Only reinitialize if we're not already initialized
       _initializeCamera();
     }
   }
@@ -55,6 +83,7 @@ class _CameraScreenState extends State<CameraScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    // Ensure camera service is always disposed, even if not initialized
     _cameraService.dispose();
     super.dispose();
   }
@@ -84,8 +113,13 @@ class _CameraScreenState extends State<CameraScreen>
       final result = await _plantApiService.identifyPlant(optimizedImagePath);
 
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => ResultScreen(result: result)),
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ResultScreen(
+              result: result,
+              gardenService: widget.gardenService,
+            ),
+          ),
         );
       }
     } catch (e) {
@@ -121,6 +155,46 @@ class _CameraScreenState extends State<CameraScreen>
     );
   }
 
+  Future<void> _pickImageFromGallery() async {
+    setState(() {
+      _isCapturing = true;
+    });
+
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+      if (image != null) {
+        // Optimize the image for API
+        final optimizedImagePath = await ImageUtils.optimizeImage(image.path);
+
+        // Identify the plant
+        final result = await _plantApiService.identifyPlant(optimizedImagePath);
+
+        if (mounted) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => ResultScreen(
+                result: result,
+                gardenService: widget.gardenService,
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        _showErrorDialog('Error: ${e.toString()}');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCapturing = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -140,7 +214,7 @@ class _CameraScreenState extends State<CameraScreen>
                 icon: const Icon(Icons.arrow_back),
                 color: Colors.white,
                 iconSize: 28,
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: widget.onNavigateToGarden ?? () => Navigator.of(context).pop(),
               ),
             ),
 
@@ -155,9 +229,9 @@ class _CameraScreenState extends State<CameraScreen>
               ),
             ),
 
-            // Capture Button
+            // Capture Button - Bottom center
             Positioned(
-              bottom: 32,
+              bottom: 16,
               left: 0,
               right: 0,
               child: Center(
@@ -171,56 +245,31 @@ class _CameraScreenState extends State<CameraScreen>
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white, width: 4),
                     ),
-                    child:
-                        _isCapturing
-                            ? const CircularProgressIndicator(
-                              color: Colors.green,
-                            )
-                            : const Icon(
-                              Icons.camera_alt,
-                              size: 40,
-                              color: Colors.green,
-                            ),
+                    child: _isCapturing
+                        ? const CircularProgressIndicator(
+                            color: Colors.green,
+                          )
+                        : const Icon(
+                            Icons.camera_alt,
+                            size: 40,
+                            color: Colors.green,
+                          ),
                   ),
                 ),
               ),
             ),
 
-            // Focus helper text
+            // Gallery Button - Bottom left
             Positioned(
-              bottom: 140,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Text(
-                    'Focus on the plant',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
+              bottom: 16,
+              left: 16,
+              child: IconButton(
+                icon: const Icon(Icons.photo_library),
+                color: Colors.white,
+                iconSize: 28,
+                onPressed: _isInitialized && !_isCapturing ? _pickImageFromGallery : null,
               ),
             ),
-
-            // Loading overlay
-            if (!_isInitialized)
-              Container(
-                color: Colors.black,
-                child: const Center(
-                  child: LoadingIndicator(message: 'Initializing camera...'),
-                ),
-              ),
           ],
         ),
       ),
