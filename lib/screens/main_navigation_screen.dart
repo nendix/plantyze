@@ -27,7 +27,8 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen>
     with TickerProviderStateMixin {
-  int _currentIndex = 0; // Start with Garden tab (default home)
+  int _currentIndex = 0;
+  int _previousIndex = 0;
   late TabController _tabController;
 
   @override
@@ -51,6 +52,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
   void _onTabChanged() {
     if (_tabController.index != _currentIndex) {
       setState(() {
+        _previousIndex = _currentIndex;
         _currentIndex = _tabController.index;
       });
     }
@@ -58,9 +60,19 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
 
   void _onBottomNavTapped(int index) {
     setState(() {
+      _previousIndex = _currentIndex;
       _currentIndex = index;
     });
     _tabController.animateTo(index);
+  }
+
+  void _returnToPreviousTab() {
+    setState(() {
+      final temp = _currentIndex;
+      _currentIndex = _previousIndex;
+      _previousIndex = temp;
+    });
+    _tabController.animateTo(_currentIndex);
   }
 
   @override
@@ -80,7 +92,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
               gardenService: widget.gardenService,
               cameraService: widget.cameraService,
               plantApiService: widget.plantApiService,
-              onNavigateToGarden: () => _onBottomNavTapped(0),
+              onNavigateBack: _returnToPreviousTab,
             ),
             
             // Settings Tab (index 2)

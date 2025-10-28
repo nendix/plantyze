@@ -11,14 +11,14 @@ class CameraScreen extends StatefulWidget {
   final GardenService gardenService;
   final CameraService cameraService;
   final PlantApiService plantApiService;
-  final VoidCallback? onNavigateToGarden;
+  final VoidCallback? onNavigateBack;
 
   const CameraScreen({
     super.key,
     required this.gardenService,
     required this.cameraService,
     required this.plantApiService,
-    this.onNavigateToGarden,
+    this.onNavigateBack,
   });
 
   @override
@@ -224,7 +224,7 @@ class _CameraScreenState extends State<CameraScreen>
                 icon: const Icon(Icons.arrow_back),
                 color: Colors.white,
                 iconSize: 28,
-                onPressed: widget.onNavigateToGarden ?? () => Navigator.of(context).pop(),
+                onPressed: widget.onNavigateBack ?? () => Navigator.of(context).pop(),
               ),
             ),
 
