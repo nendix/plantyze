@@ -90,4 +90,36 @@ class ImageUtils {
     await File(croppedPath).writeAsBytes(croppedBytes);
     return croppedPath;
   }
+
+  static Future<void> cleanupOptimizedImage(String imagePath) async {
+    try {
+      final File file = File(imagePath);
+      if (await file.exists()) {
+        final String fileName = path.basename(imagePath);
+        if (fileName.startsWith('optimized_') || fileName.startsWith('cropped_')) {
+          await file.delete();
+        }
+      }
+    } catch (e) {
+      // Silently ignore cleanup errors
+    }
+  }
+
+  static Future<void> cleanupAllOptimizedImages() async {
+    try {
+      final Directory appDir = await getApplicationDocumentsDirectory();
+      final List<FileSystemEntity> files = appDir.listSync();
+      
+      for (var entity in files) {
+        if (entity is File) {
+          final String fileName = path.basename(entity.path);
+          if (fileName.startsWith('optimized_') || fileName.startsWith('cropped_')) {
+            await entity.delete();
+          }
+        }
+      }
+    } catch (e) {
+      // Silently ignore cleanup errors
+    }
+  }
 }

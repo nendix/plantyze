@@ -31,7 +31,6 @@ class _CameraScreenState extends State<CameraScreen>
   late PlantApiService _plantApiService;
   bool _isInitialized = false;
   bool _isCapturing = false;
-  bool _isFlashOn = false;
 
   @override
   void initState() {
@@ -89,10 +88,14 @@ class _CameraScreenState extends State<CameraScreen>
   }
 
   Future<void> _toggleFlash() async {
-    await _cameraService.toggleFlash();
-    setState(() {
-      _isFlashOn = !_isFlashOn;
-    });
+    try {
+      await _cameraService.toggleFlash();
+      setState(() {});
+    } catch (e) {
+      if (mounted) {
+        _showErrorDialog('Failed to toggle flash: ${e.toString()}');
+      }
+    }
   }
 
   Future<void> _takePicture() async {
@@ -111,6 +114,9 @@ class _CameraScreenState extends State<CameraScreen>
 
       // Identify the plant
       final result = await _plantApiService.identifyPlant(optimizedImagePath);
+
+      // Cleanup optimized image after API call
+      await ImageUtils.cleanupOptimizedImage(optimizedImagePath);
 
       if (mounted) {
         Navigator.of(context).push(
@@ -146,7 +152,6 @@ class _CameraScreenState extends State<CameraScreen>
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  Navigator.of(context).pop(); // Go back to previous screen
                 },
                 child: const Text('OK'),
               ),
@@ -170,6 +175,9 @@ class _CameraScreenState extends State<CameraScreen>
 
         // Identify the plant
         final result = await _plantApiService.identifyPlant(optimizedImagePath);
+
+        // Cleanup optimized image after API call
+        await ImageUtils.cleanupOptimizedImage(optimizedImagePath);
 
         if (mounted) {
           Navigator.of(context).push(
@@ -222,7 +230,7 @@ class _CameraScreenState extends State<CameraScreen>
               top: 16,
               right: 16,
               child: IconButton(
-                icon: Icon(_isFlashOn ? Icons.flash_on : Icons.flash_off),
+                icon: Icon(_cameraService.isFlashOn ? Icons.flash_on : Icons.flash_off),
                 color: Colors.white,
                 iconSize: 28,
                 onPressed: _isInitialized ? _toggleFlash : null,

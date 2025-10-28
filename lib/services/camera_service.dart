@@ -11,6 +11,13 @@ class CameraService {
 
   CameraController? get controller => _controller;
   bool get isInitialized => _isInitialized;
+  
+  bool get isFlashOn {
+    if (_controller == null || !_controller!.value.isInitialized) {
+      return false;
+    }
+    return _controller!.value.flashMode == FlashMode.torch;
+  }
 
   Future<void> initialize() async {
     // Request camera permission
