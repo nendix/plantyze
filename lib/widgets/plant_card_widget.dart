@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:plantyze/models/plant.dart';
 
 class PlantCardWidget extends StatelessWidget {
@@ -26,47 +25,6 @@ class PlantCardWidget extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Plant image
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                bottomLeft: Radius.circular(12),
-              ),
-              child: Hero(
-                tag: 'plant_image_${plant.id}',
-                child:
-                    plant.imageUrl.isNotEmpty
-                        ? CachedNetworkImage(
-                          imageUrl: plant.imageUrl,
-                          height: 120,
-                          width: 120,
-                          fit: BoxFit.cover,
-                          placeholder:
-                              (context, url) => Container(
-                                color: Colors.grey[200],
-                                height: 120,
-                                width: 120,
-                                child: const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              ),
-                          errorWidget:
-                              (context, url, error) => Container(
-                                color: Colors.grey[200],
-                                height: 120,
-                                width: 120,
-                                child: const Icon(Icons.error),
-                              ),
-                        )
-                        : Container(
-                          color: Colors.grey[200],
-                          height: 120,
-                          width: 120,
-                          child: const Icon(Icons.local_florist),
-                        ),
-              ),
-            ),
-
             // Plant information
             Expanded(
               child: Padding(
