@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:plantyze/screens/home_screen.dart';
+import 'package:plantyze/screens/main_navigation_screen.dart';
 import 'package:plantyze/services/theme_service.dart';
+import 'package:plantyze/services/garden_service.dart';
+import 'package:plantyze/services/camera_service.dart';
+import 'package:plantyze/services/plant_api_service.dart';
 import 'package:plantyze/config/theme_config.dart';
 
 void main() async {
@@ -29,23 +32,41 @@ class PlantyzeApp extends StatefulWidget {
 
 class _PlantyzeAppState extends State<PlantyzeApp> {
   late ThemeService _themeService;
+  late GardenService _gardenService;
+  late CameraService _cameraService;
+  late PlantApiService _plantApiService;
   bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeThemeService();
+    _initializeServices();
   }
 
-  Future<void> _initializeThemeService() async {
+  Future<void> _initializeServices() async {
     _themeService = ThemeService();
-    await _themeService.initialize();
+    _gardenService = GardenService();
+    _cameraService = CameraService();
+    _plantApiService = PlantApiService();
+    
+    // Initialize services that need async initialization
+    await Future.wait([
+      _themeService.initialize(),
+      _gardenService.initialize(),
+    ]);
     
     if (mounted) {
       setState(() {
         _isInitialized = true;
       });
     }
+  }
+
+  @override
+  void dispose() {
+    // Clean up camera service when app is disposed
+    _cameraService.dispose();
+    super.dispose();
   }
 
   @override
@@ -82,7 +103,12 @@ class _PlantyzeAppState extends State<PlantyzeApp> {
           theme: ThemeConfig.lightTheme,
           darkTheme: ThemeConfig.darkTheme,
           themeMode: _themeService.materialThemeMode,
-          home: HomeScreen(themeService: _themeService),
+          home: MainNavigationScreen(
+            themeService: _themeService,
+            gardenService: _gardenService,
+            cameraService: _cameraService,
+            plantApiService: _plantApiService,
+          ),
         );
       },
     );
