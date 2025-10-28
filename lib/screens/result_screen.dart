@@ -3,32 +3,126 @@ import 'package:flutter/material.dart';
 import 'package:plantyze/models/identification_result.dart';
 import 'package:plantyze/models/plant.dart';
 import 'package:plantyze/screens/plant_details_screen.dart';
+import 'package:plantyze/services/garden_service.dart';
 import 'package:plantyze/widgets/plant_card_widget.dart';
 
-class ResultScreen extends StatelessWidget {
+class ResultScreen extends StatefulWidget {
   final IdentificationResult result;
+  final GardenService gardenService;
 
-  const ResultScreen({super.key, required this.result});
+  const ResultScreen({
+    super.key, 
+    required this.result,
+    required this.gardenService,
+  });
+
+  @override
+  State<ResultScreen> createState() => _ResultScreenState();
+}
+
+class _ResultScreenState extends State<ResultScreen> {
+  bool _isSaving = false;
+
+  Future<void> _savePlantToGarden(Plant plant) async {
+    if (_isSaving) return;
+
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      final success = await widget.gardenService.savePlant(plant);
+      
+      if (mounted) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.eco, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text('${plant.commonName} saved to your garden!'),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.green[600],
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.info, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text('${plant.commonName} is already in your garden'),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.orange[600],
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save plant: ${e.toString()}'),
+            backgroundColor: Colors.red[600],
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Identification Results'),
+        title: const Text('Results'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body:
-          result.isSuccessful
-              ? _buildSuccessfulResult(context)
-              : _buildFailedResult(context),
+      body: widget.result.isSuccessful
+          ? _buildSuccessfulResult(context)
+          : _buildFailedResult(context),
+      floatingActionButton: widget.result.isSuccessful && widget.result.plants.isNotEmpty
+          ? FloatingActionButton.extended(
+              onPressed: _isSaving 
+                  ? null 
+                  : () => _savePlantToGarden(widget.result.plants.first),
+              icon: _isSaving 
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.eco),
+              label: Text(_isSaving ? 'Saving...' : 'Save to Garden'),
+              backgroundColor: widget.gardenService.isPlantSaved(widget.result.plants.first)
+                  ? Colors.green[600]
+                  : null,
+            )
+          : null,
     );
   }
 
   Widget _buildSuccessfulResult(BuildContext context) {
-    if (result.plants.isEmpty) {
+    if (widget.result.plants.isEmpty) {
       return _buildNoResultsFound(context);
     }
 
@@ -41,7 +135,7 @@ class ResultScreen extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.black,
             image: DecorationImage(
-              image: FileImage(File(result.queryCapturedImage)),
+              image: FileImage(File(widget.result.queryCapturedImage)),
               fit: BoxFit.cover,
             ),
           ),
@@ -54,21 +148,16 @@ class ResultScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Results',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
                 Text(
-                  'We found ${result.plants.length} potential matches',
+                  'Found ${widget.result.plants.length} potential matches',
                   style: const TextStyle(fontSize: 16, color: Colors.black54),
                 ),
                 const SizedBox(height: 16),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: result.plants.length,
+                    itemCount: widget.result.plants.length,
                     itemBuilder: (context, index) {
-                      final plant = result.plants[index];
+                      final plant = widget.result.plants[index];
                       final confidence = (plant.probability * 100)
                           .toStringAsFixed(1);
 
@@ -103,7 +192,7 @@ class ResultScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              result.errorMessage ?? 'Unknown error occurred',
+              widget.result.errorMessage ?? 'Unknown error occurred',
               style: const TextStyle(fontSize: 16, color: Colors.black54),
               textAlign: TextAlign.center,
             ),
