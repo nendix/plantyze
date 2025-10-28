@@ -3,16 +3,15 @@ import 'package:intl/intl.dart';
 import 'package:plantyze/models/saved_plant.dart';
 import 'package:plantyze/services/garden_service.dart';
 import 'package:plantyze/screens/plant_details_screen.dart';
+import 'package:plantyze/screens/base_screen.dart';
 import 'package:plantyze/widgets/plant_card_widget.dart';
 
 class GardenScreen extends StatefulWidget {
   final GardenService gardenService;
-  final VoidCallback? onNavigateToCamera;
 
   const GardenScreen({
     super.key, 
     required this.gardenService,
-    this.onNavigateToCamera,
   });
 
   @override
@@ -181,7 +180,7 @@ class _GardenScreenState extends State<GardenScreen> {
             ),
             const SizedBox(height: 32),
             ElevatedButton.icon(
-              onPressed: widget.onNavigateToCamera,
+              onPressed: () => context.navigateToTab(1),
               icon: const Icon(Icons.camera_alt),
               label: const Text('Identify Plants'),
               style: ElevatedButton.styleFrom(

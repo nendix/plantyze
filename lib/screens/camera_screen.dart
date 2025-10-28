@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:plantyze/services/camera_service.dart';
 import 'package:plantyze/services/plant_api_service.dart';
 import 'package:plantyze/services/garden_service.dart';
+import 'package:plantyze/screens/base_screen.dart';
 import 'package:plantyze/screens/result_screen.dart';
 import 'package:plantyze/utils/image_utils.dart';
 import 'package:plantyze/widgets/camera_preview_widget.dart';
@@ -11,14 +12,12 @@ class CameraScreen extends StatefulWidget {
   final GardenService gardenService;
   final CameraService cameraService;
   final PlantApiService plantApiService;
-  final VoidCallback? onNavigateBack;
 
   const CameraScreen({
     super.key,
     required this.gardenService,
     required this.cameraService,
     required this.plantApiService,
-    this.onNavigateBack,
   });
 
   @override
@@ -121,7 +120,7 @@ class _CameraScreenState extends State<CameraScreen>
       await ImageUtils.cleanupOptimizedImage(optimizedImagePath);
 
       if (mounted) {
-        Navigator.of(context).push(
+        await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => ResultScreen(
               result: result,
@@ -129,6 +128,11 @@ class _CameraScreenState extends State<CameraScreen>
             ),
           ),
         );
+        
+        if (mounted) {
+          await _cameraService.dispose();
+          await _initializeCamera();
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -182,7 +186,7 @@ class _CameraScreenState extends State<CameraScreen>
         await ImageUtils.cleanupOptimizedImage(optimizedImagePath);
 
         if (mounted) {
-          Navigator.of(context).push(
+          await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => ResultScreen(
                 result: result,
@@ -190,6 +194,11 @@ class _CameraScreenState extends State<CameraScreen>
               ),
             ),
           );
+          
+          if (mounted) {
+            await _cameraService.dispose();
+            await _initializeCamera();
+          }
         }
       }
     } catch (e) {
@@ -224,7 +233,7 @@ class _CameraScreenState extends State<CameraScreen>
                 icon: const Icon(Icons.arrow_back),
                 color: Colors.white,
                 iconSize: 28,
-                onPressed: widget.onNavigateBack ?? () => Navigator.of(context).pop(),
+                onPressed: () => context.navigateBack(),
               ),
             ),
 
