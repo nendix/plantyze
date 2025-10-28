@@ -8,16 +8,12 @@ class CameraService {
   CameraController? _controller;
   List<CameraDescription> _cameras = [];
   bool _isInitialized = false;
+  bool _isFlashOn = false;
 
   CameraController? get controller => _controller;
   bool get isInitialized => _isInitialized;
   
-  bool get isFlashOn {
-    if (_controller == null || !_controller!.value.isInitialized) {
-      return false;
-    }
-    return _controller!.value.flashMode == FlashMode.torch;
-  }
+  bool get isFlashOn => _isFlashOn;
 
   Future<void> initialize() async {
     // Request camera permission
@@ -49,6 +45,7 @@ class CameraService {
       // Initialize the controller
       await _controller!.initialize();
       _isInitialized = true;
+      _isFlashOn = false;
     } catch (e) {
       _isInitialized = false;
       rethrow;
@@ -84,16 +81,23 @@ class CameraService {
       await _controller!.dispose();
       _controller = null;
       _isInitialized = false;
+      _isFlashOn = false;
     }
   }
 
   Future<void> toggleFlash() async {
     if (_controller == null || !_controller!.value.isInitialized) return;
 
-    if (_controller!.value.flashMode == FlashMode.off) {
-      await _controller!.setFlashMode(FlashMode.torch);
-    } else {
-      await _controller!.setFlashMode(FlashMode.off);
+    try {
+      if (_isFlashOn) {
+        await _controller!.setFlashMode(FlashMode.off);
+        _isFlashOn = false;
+      } else {
+        await _controller!.setFlashMode(FlashMode.torch);
+        _isFlashOn = true;
+      }
+    } catch (e) {
+      rethrow;
     }
   }
 }
