@@ -90,7 +90,9 @@ class _CameraScreenState extends State<CameraScreen>
   Future<void> _toggleFlash() async {
     try {
       await _cameraService.toggleFlash();
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     } catch (e) {
       if (mounted) {
         _showErrorDialog('Failed to toggle flash: ${e.toString()}');

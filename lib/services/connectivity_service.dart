@@ -6,10 +6,13 @@ class ConnectivityService {
   Future<bool> hasInternetConnection() async {
     try {
       final List<ConnectivityResult> result = await _connectivity.checkConnectivity();
-      return result.isNotEmpty && 
-             !result.contains(ConnectivityResult.none);
+      return result.any((r) => 
+        r == ConnectivityResult.wifi || 
+        r == ConnectivityResult.mobile || 
+        r == ConnectivityResult.ethernet
+      );
     } catch (e) {
-      return false;
+      return true;
     }
   }
 
