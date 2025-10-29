@@ -113,7 +113,10 @@ class _GardenScreenState extends State<GardenScreen> {
   void _navigateToPlantDetails(SavedPlant savedPlant) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => PlantDetailsScreen(plant: savedPlant.plant),
+        builder: (context) => PlantDetailsScreen(
+          plant: savedPlant.plant,
+          gardenService: widget.gardenService,
+        ),
       ),
     );
   }
