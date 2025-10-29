@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:plantyze/models/identification_result.dart';
 import 'package:plantyze/models/plant.dart';
@@ -11,7 +10,7 @@ class ResultScreen extends StatefulWidget {
   final GardenService gardenService;
 
   const ResultScreen({
-    super.key, 
+    super.key,
     required this.result,
     required this.gardenService,
   });
@@ -32,7 +31,7 @@ class _ResultScreenState extends State<ResultScreen> {
 
     try {
       final success = await widget.gardenService.savePlant(plant);
-      
+
       if (mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -58,7 +57,9 @@ class _ResultScreenState extends State<ResultScreen> {
                   const Icon(Icons.info, color: Colors.white),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text('${plant.commonName} is already in your garden'),
+                    child: Text(
+                      '${plant.commonName} is already in your garden',
+                    ),
                   ),
                 ],
               ),
@@ -100,12 +101,13 @@ class _ResultScreenState extends State<ResultScreen> {
       body: widget.result.isSuccessful
           ? _buildSuccessfulResult(context)
           : _buildFailedResult(context),
-      floatingActionButton: widget.result.isSuccessful && widget.result.plants.isNotEmpty
+      floatingActionButton:
+          widget.result.isSuccessful && widget.result.plants.isNotEmpty
           ? FloatingActionButton.extended(
-              onPressed: _isSaving 
-                  ? null 
+              onPressed: _isSaving
+                  ? null
                   : () => _savePlantToGarden(widget.result.plants.first),
-              icon: _isSaving 
+              icon: _isSaving
                   ? const SizedBox(
                       width: 20,
                       height: 20,
@@ -113,7 +115,8 @@ class _ResultScreenState extends State<ResultScreen> {
                     )
                   : const Icon(Icons.eco),
               label: Text(_isSaving ? 'Saving...' : 'Save to Garden'),
-              backgroundColor: widget.gardenService.isPlantSaved(widget.result.plants.first)
+              backgroundColor:
+                  widget.gardenService.isPlantSaved(widget.result.plants.first)
                   ? Colors.green[600]
                   : null,
             )
@@ -126,54 +129,27 @@ class _ResultScreenState extends State<ResultScreen> {
       return _buildNoResultsFound(context);
     }
 
-    return Column(
-      children: [
-        // Captured image preview
-        Container(
-          height: MediaQuery.of(context).size.height * 0.3,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.black,
-            image: DecorationImage(
-              image: FileImage(File(widget.result.queryCapturedImage)),
-              fit: BoxFit.cover,
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: widget.result.plants.length,
+              itemBuilder: (context, index) {
+                final plant = widget.result.plants[index];
+
+                return PlantCardWidget(
+                  plant: plant,
+                  confidenceScore: plant.score,
+                  onTap: () => _navigateToPlantDetails(context, plant),
+                );
+              },
             ),
           ),
-        ),
-
-        // Results list
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Found ${widget.result.plants.length} potential matches',
-                  style: const TextStyle(fontSize: 16, color: Colors.black54),
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: widget.result.plants.length,
-                    itemBuilder: (context, index) {
-                      final plant = widget.result.plants[index];
-                      final confidence = (plant.probability * 100)
-                          .toStringAsFixed(1);
-
-                      return PlantCardWidget(
-                        plant: plant,
-                        confidence: confidence,
-                        onTap: () => _navigateToPlantDetails(context, plant),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

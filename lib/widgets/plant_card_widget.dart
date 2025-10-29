@@ -3,13 +3,13 @@ import 'package:plantyze/models/plant.dart';
 
 class PlantCardWidget extends StatelessWidget {
   final Plant plant;
-  final String confidence;
+  final double confidenceScore;
   final VoidCallback onTap;
 
   const PlantCardWidget({
     super.key,
     required this.plant,
-    required this.confidence,
+    required this.confidenceScore,
     required this.onTap,
   });
 
@@ -22,82 +22,78 @@ class PlantCardWidget extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Plant information
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Stack(
+            children: [
+              Positioned(
+                top: 0,
+                right: 0,
+                child: _buildConfidenceCircle(),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 24),
+                child: Row(
                   children: [
-                    Text(
-                      plant.commonName,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            plant.commonName,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            plant.scientificName,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontStyle: FontStyle.italic,
+                              color: Colors.grey[600],
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      plant.scientificName,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontStyle: FontStyle.italic,
-                        color: Colors.black54,
-                      ),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: Colors.grey[400],
                     ),
-                    const SizedBox(height: 8),
-                    Row(children: [_buildConfidenceBadge(context)]),
                   ],
                 ),
               ),
-            ),
-
-            // Arrow indicator
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: Colors.grey[400],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildConfidenceBadge(BuildContext context) {
-    final double confidenceValue = double.parse(confidence) / 100;
-    Color badgeColor;
+  Widget _buildConfidenceCircle() {
+    Color circleColor;
 
-    if (confidenceValue >= 0.75) {
-      badgeColor = Colors.green;
-    } else if (confidenceValue >= 0.5) {
-      badgeColor = Colors.orange;
+    if (confidenceScore >= 0.75) {
+      circleColor = Colors.green;
+    } else if (confidenceScore >= 0.5) {
+      circleColor = Colors.amber;
     } else {
-      badgeColor = Colors.red;
+      circleColor = Colors.red;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      width: 12,
+      height: 12,
       decoration: BoxDecoration(
-        color: badgeColor.withValues(alpha: 0.1),
-        border: Border.all(color: badgeColor),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        '$confidence%',
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          color: badgeColor,
-        ),
+        color: circleColor,
+        shape: BoxShape.circle,
       ),
     );
   }

@@ -242,7 +242,6 @@ class _GardenScreenState extends State<GardenScreen> {
             itemCount: savedPlants.length,
             itemBuilder: (context, index) {
               final savedPlant = savedPlants[index];
-              final confidence = (savedPlant.plant.probability * 100).toStringAsFixed(1);
 
               return Dismissible(
                 key: Key(savedPlant.id),
@@ -269,7 +268,7 @@ class _GardenScreenState extends State<GardenScreen> {
                   children: [
                     PlantCardWidget(
                       plant: savedPlant.plant,
-                      confidence: confidence,
+                      confidenceScore: savedPlant.plant.score,
                       onTap: () => _navigateToPlantDetails(savedPlant),
                     ),
                     // Add saved date info
