@@ -1,11 +1,90 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:plantyze/models/plant.dart';
+import 'package:plantyze/services/garden_service.dart';
 
-class PlantDetailsScreen extends StatelessWidget {
+class PlantDetailsScreen extends StatefulWidget {
   final Plant plant;
+  final GardenService gardenService;
 
-  const PlantDetailsScreen({super.key, required this.plant});
+  const PlantDetailsScreen({
+    super.key,
+    required this.plant,
+    required this.gardenService,
+  });
+
+  @override
+  State<PlantDetailsScreen> createState() => _PlantDetailsScreenState();
+}
+
+class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
+  bool _isSaving = false;
+
+  Future<void> _savePlantToGarden() async {
+    if (_isSaving) return;
+
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      final success = await widget.gardenService.savePlant(widget.plant);
+
+      if (mounted) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.eco, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text('${widget.plant.commonName} saved to your garden!'),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.green[600],
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.info, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '${widget.plant.commonName} is already in your garden',
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.orange[600],
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save plant: ${e.toString()}'),
+            backgroundColor: Colors.red[600],
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +95,20 @@ class PlantDetailsScreen extends StatelessWidget {
           SliverToBoxAdapter(child: _buildBody(context)),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _isSaving ? null : _savePlantToGarden,
+        icon: _isSaving
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.eco),
+        label: Text(_isSaving ? 'Saving...' : 'Save to Garden'),
+        backgroundColor: widget.gardenService.isPlantSaved(widget.plant)
+            ? Colors.green[600]
+            : null,
+      ),
     );
   }
 
@@ -25,7 +118,7 @@ class PlantDetailsScreen extends StatelessWidget {
       pinned: true,
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
-          plant.commonName,
+          widget.plant.commonName,
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -39,11 +132,11 @@ class PlantDetailsScreen extends StatelessWidget {
           ),
         ),
         background: Hero(
-          tag: 'plant_image_${plant.id}',
+          tag: 'plant_image_${widget.plant.id}',
           child:
-              plant.imageUrl.isNotEmpty
+              widget.plant.imageUrl.isNotEmpty
                   ? CachedNetworkImage(
-                    imageUrl: plant.imageUrl,
+                    imageUrl: widget.plant.imageUrl,
                     fit: BoxFit.cover,
                     placeholder:
                         (context, url) => Container(
@@ -84,7 +177,7 @@ class PlantDetailsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            plant.scientificName,
+            widget.plant.scientificName,
             style: const TextStyle(fontSize: 20, fontStyle: FontStyle.italic),
           ),
 
@@ -100,7 +193,7 @@ class PlantDetailsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(plant.family.scientificNameWithoutAuthor, style: const TextStyle(fontSize: 18)),
+          Text(widget.plant.family.scientificNameWithoutAuthor, style: const TextStyle(fontSize: 18)),
 
           const Divider(height: 32),
 
@@ -115,19 +208,19 @@ class PlantDetailsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           LinearProgressIndicator(
-            value: plant.probability,
+            value: widget.plant.probability,
             backgroundColor: Colors.grey[200],
-            color: _getConfidenceColor(plant.probability),
+            color: _getConfidenceColor(widget.plant.probability),
             minHeight: 10,
             borderRadius: BorderRadius.circular(5),
           ),
           const SizedBox(height: 8),
           Text(
-            '${(plant.probability * 100).toStringAsFixed(1)}%',
+            '${(widget.plant.probability * 100).toStringAsFixed(1)}%',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: _getConfidenceColor(plant.probability),
+              color: _getConfidenceColor(widget.plant.probability),
             ),
           ),
 
@@ -144,16 +237,16 @@ class PlantDetailsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            plant.description.isNotEmpty
-                ? plant.description
-                : 'No additional information available for this plant. You can search online for more details about ${plant.commonName} (${plant.scientificName}).',
+            widget.plant.description.isNotEmpty
+                ? widget.plant.description
+                : 'No additional information available for this plant. You can search online for more details about ${widget.plant.commonName} (${widget.plant.scientificName}).',
             style: const TextStyle(fontSize: 16),
           ),
 
           const SizedBox(height: 32),
 
           // Similar images if available
-          if (plant.similarImages.isNotEmpty) ...[
+          if (widget.plant.similarImages.isNotEmpty) ...[
             const Text(
               'Similar Images',
               style: TextStyle(
@@ -167,14 +260,14 @@ class PlantDetailsScreen extends StatelessWidget {
               height: 120,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: plant.similarImages.length,
+                itemCount: widget.plant.similarImages.length,
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: const EdgeInsets.only(right: 8.0),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: CachedNetworkImage(
-                        imageUrl: plant.similarImages[index],
+                        imageUrl: widget.plant.similarImages[index],
                         width: 120,
                         height: 120,
                         fit: BoxFit.cover,
