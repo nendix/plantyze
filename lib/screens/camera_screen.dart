@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:plantyze/screens/result_screen.dart';
 import 'package:plantyze/services/camera_service.dart';
 import 'package:plantyze/services/plant_api_service.dart';
 import 'package:plantyze/services/garden_service.dart';
 import 'package:plantyze/screens/base_screen.dart';
-import 'package:plantyze/screens/result_screen.dart';
-import 'package:plantyze/utils/image_utils.dart';
 import 'package:plantyze/widgets/camera_preview_widget.dart';
 
 class CameraScreen extends StatefulWidget {
@@ -110,14 +109,8 @@ class _CameraScreenState extends State<CameraScreen>
       // Take the picture
       final imagePath = await _cameraService.takePicture();
 
-      // Optimize the image for API
-      final optimizedImagePath = await ImageUtils.optimizeImage(imagePath);
-
       // Identify the plant
-      final result = await _plantApiService.identifyPlant(optimizedImagePath);
-
-      // Cleanup optimized image after API call
-      await ImageUtils.cleanupOptimizedImage(optimizedImagePath);
+      final result = await _plantApiService.identifyPlant(imagePath);
 
       if (mounted) {
         await Navigator.of(context).push(
@@ -176,14 +169,8 @@ class _CameraScreenState extends State<CameraScreen>
       final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
       if (image != null) {
-        // Optimize the image for API
-        final optimizedImagePath = await ImageUtils.optimizeImage(image.path);
-
         // Identify the plant
-        final result = await _plantApiService.identifyPlant(optimizedImagePath);
-
-        // Cleanup optimized image after API call
-        await ImageUtils.cleanupOptimizedImage(optimizedImagePath);
+        final result = await _plantApiService.identifyPlant(image.path);
 
         if (mounted) {
           await Navigator.of(context).push(
