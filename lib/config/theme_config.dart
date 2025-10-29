@@ -151,7 +151,7 @@ class ThemeConfig {
       ),
 
       // Elegant cards
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.lightSurface,
         shadowColor: AppColors.lightShadow,
         elevation: 4,
@@ -205,7 +205,7 @@ class ThemeConfig {
       ),
 
       // Dialog theme
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: AppColors.lightSurface,
         shadowColor: AppColors.lightShadow,
         elevation: 8,
@@ -352,7 +352,7 @@ class ThemeConfig {
       ),
 
       // Midnight elegant cards
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.darkSurface,
         shadowColor: AppColors.darkShadow,
         elevation: 6,
@@ -406,7 +406,7 @@ class ThemeConfig {
       ),
 
       // Dark dialog theme
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: AppColors.darkSurface,
         shadowColor: AppColors.darkShadow,
         elevation: 12,
