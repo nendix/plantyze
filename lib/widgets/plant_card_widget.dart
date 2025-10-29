@@ -26,11 +26,7 @@ class PlantCardWidget extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Stack(
             children: [
-              Positioned(
-                top: 0,
-                right: 0,
-                child: _buildConfidenceCircle(),
-              ),
+              Positioned(top: 0, right: 0, child: _buildConfidenceCircle()),
               Padding(
                 padding: const EdgeInsets.only(right: 24),
                 child: Row(
@@ -62,11 +58,6 @@ class PlantCardWidget extends StatelessWidget {
                         ],
                       ),
                     ),
-                    Icon(
-                      Icons.arrow_forward_ios,
-                      size: 16,
-                      color: Colors.grey[400],
-                    ),
                   ],
                 ),
               ),
@@ -80,9 +71,9 @@ class PlantCardWidget extends StatelessWidget {
   Widget _buildConfidenceCircle() {
     Color circleColor;
 
-    if (confidenceScore >= 0.75) {
+    if (confidenceScore >= 0.6) {
       circleColor = Colors.green;
-    } else if (confidenceScore >= 0.5) {
+    } else if (confidenceScore >= 0.3) {
       circleColor = Colors.amber;
     } else {
       circleColor = Colors.red;
@@ -91,10 +82,7 @@ class PlantCardWidget extends StatelessWidget {
     return Container(
       width: 12,
       height: 12,
-      decoration: BoxDecoration(
-        color: circleColor,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: circleColor, shape: BoxShape.circle),
     );
   }
 }
