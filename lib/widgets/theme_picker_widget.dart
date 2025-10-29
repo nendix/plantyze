@@ -36,32 +36,34 @@ class ThemePickerWidget extends StatelessWidget {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Choose Theme'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: AppThemeMode.values.map((AppThemeMode mode) {
-              return ListenableBuilder(
-                listenable: themeService,
-                builder: (context, child) {
-                  return RadioListTile<AppThemeMode>(
-                    title: Row(
-                      children: [
-                        Icon(themeService.getThemeModeIcon(mode), size: 20),
-                        const SizedBox(width: 12),
-                        Text(themeService.getThemeModeDisplayName(mode)),
-                      ],
-                    ),
-                    value: mode,
-                    groupValue: themeService.themeMode,
-                    onChanged: (AppThemeMode? value) {
-                      if (value != null) {
-                        themeService.setThemeMode(value);
-                        Navigator.of(context).pop();
-                      }
-                    },
-                  );
+          content: ListenableBuilder(
+            listenable: themeService,
+            builder: (context, child) {
+              return RadioGroup<AppThemeMode>(
+                groupValue: themeService.themeMode,
+                onChanged: (AppThemeMode? value) {
+                  if (value != null) {
+                    themeService.setThemeMode(value);
+                    Navigator.of(context).pop();
+                  }
                 },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: AppThemeMode.values.map((AppThemeMode mode) {
+                    return RadioListTile<AppThemeMode>(
+                      title: Row(
+                        children: [
+                          Icon(themeService.getThemeModeIcon(mode), size: 20),
+                          const SizedBox(width: 12),
+                          Text(themeService.getThemeModeDisplayName(mode)),
+                        ],
+                      ),
+                      value: mode,
+                    );
+                  }).toList(),
+                ),
               );
-            }).toList(),
+            },
           ),
           actions: [
             TextButton(

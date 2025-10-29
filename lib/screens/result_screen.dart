@@ -52,7 +52,7 @@ class _ResultScreenState extends State<ResultScreen> {
           decoration: BoxDecoration(
             color: Colors.black,
             image: DecorationImage(
-              image: FileImage(File(widget.result.queryCapturedImage)),
+              image: FileImage(File(widget.result.capturedImagePath)),
               fit: BoxFit.cover,
             ),
           ),

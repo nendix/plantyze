@@ -193,7 +193,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
             ),
           ),
           const SizedBox(height: 4),
-          Text(widget.plant.family.scientificNameWithoutAuthor, style: const TextStyle(fontSize: 18)),
+          Text(widget.plant.family, style: const TextStyle(fontSize: 18)),
 
           const Divider(height: 32),
 
