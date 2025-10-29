@@ -13,7 +13,7 @@ class AppConstants {
   // Image Processing
   static const int maxImageDimension = 1024;
   static const int imageQuality = 85;
-  static const int maxFileSizeBytes = 5 * 1024 * 1024; // 5MB
+  static const int maxFileSizeBytes = 15 * 1024 * 1024; // 15MB
   static const List<String> supportedImageFormats = ['.jpg', '.jpeg', '.png'];
 
   // UI Constants
