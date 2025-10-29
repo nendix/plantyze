@@ -4,8 +4,21 @@ import 'package:http/http.dart' as http;
 import 'package:plantyze/config/api_config.dart';
 import 'package:plantyze/models/identification_result.dart';
 import 'package:plantyze/constants/app_constants.dart';
-import 'package:plantyze/utils/validators.dart';
 import 'package:plantyze/services/connectivity_service.dart';
+
+class ValidationResult {
+  final bool isValid;
+  final String? errorMessage;
+  
+  const ValidationResult._({required this.isValid, this.errorMessage});
+  
+  factory ValidationResult.success() => const ValidationResult._(isValid: true);
+  
+  factory ValidationResult.error(String message) => ValidationResult._(
+    isValid: false, 
+    errorMessage: message
+  );
+}
 
 class PlantApiService {
   final ConnectivityService _connectivityService;

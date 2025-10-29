@@ -10,8 +10,6 @@ class GardenService extends ChangeNotifier {
   List<SavedPlant> _savedPlants = [];
 
   List<SavedPlant> get savedPlants => List.unmodifiable(_savedPlants);
-  int get plantCount => _savedPlants.length;
-  bool get isEmpty => _savedPlants.isEmpty;
   bool get isNotEmpty => _savedPlants.isNotEmpty;
 
   /// Initialize the service and load saved plants
@@ -108,21 +106,5 @@ class GardenService extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error clearing garden: $e');
     }
-  }
-
-  /// Get a saved plant by ID
-  SavedPlant? getSavedPlant(String id) {
-    try {
-      return _savedPlants.firstWhere((plant) => plant.id == id);
-    } catch (e) {
-      return null;
-    }
-  }
-
-  /// Get plants saved in a specific time range
-  List<SavedPlant> getPlantsInDateRange(DateTime start, DateTime end) {
-    return _savedPlants.where((plant) {
-      return plant.savedAt.isAfter(start) && plant.savedAt.isBefore(end);
-    }).toList();
   }
 }

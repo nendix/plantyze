@@ -41,17 +41,4 @@ class ApiConfig {
     
     return params;
   }
-  
-  /// Validate that API configuration is properly set up
-  static bool get isConfigured {
-    return plantNetApiKey.isNotEmpty;
-  }
-  
-  /// Get user-friendly error message for API configuration issues
-  static String get configurationError {
-    if (plantNetApiKey.isEmpty) {
-      return 'PlantNet API key is missing. Please add PLANTNET_API_KEY to your .env file.';
-    }
-    return '';
-  }
 }
