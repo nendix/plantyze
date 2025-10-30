@@ -115,91 +115,97 @@ class _ResultScreenState extends State<ResultScreen> {
     );
   }
 
-   Widget _buildPlantItem(
-    BuildContext context,
-    ThemeData theme,
-    Plant plant,
-    int index,
-  ) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: InkWell(
-        onTap: () => _navigateToPlantDetails(context, plant),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              PlantImageWidget(
-                imageUrl: plant.imageUrl,
-                width: 70,
-                height: 70,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (index == 0)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primary.withValues(
-                              alpha: 0.15,
-                            ),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            'Best Match',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
-                        ),
-                      ),
-                    Text(
-                      plant.commonName,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      plant.scientificName,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontStyle: FontStyle.italic,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              ConfidenceBadgeWidget(
-                score: plant.score,
-                size: 56,
-                showLabel: false,
-                showPercentage: true,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+    Widget _buildPlantItem(
+     BuildContext context,
+     ThemeData theme,
+     Plant plant,
+     int index,
+   ) {
+     return Card(
+       margin: const EdgeInsets.only(bottom: 8),
+       child: InkWell(
+         onTap: () => _navigateToPlantDetails(context, plant),
+         borderRadius: BorderRadius.circular(12),
+         child: Padding(
+           padding: const EdgeInsets.all(12),
+           child: Stack(
+             children: [
+               Row(
+                 children: [
+                   PlantImageWidget(
+                     imageUrl: plant.imageUrl,
+                     width: 70,
+                     height: 70,
+                   ),
+                   const SizedBox(width: 12),
+                   Expanded(
+                     child: Column(
+                       crossAxisAlignment: CrossAxisAlignment.start,
+                       children: [
+                         if (index == 0)
+                           Padding(
+                             padding: const EdgeInsets.only(bottom: 4),
+                             child: Container(
+                               padding: const EdgeInsets.symmetric(
+                                 horizontal: 6,
+                                 vertical: 2,
+                               ),
+                               decoration: BoxDecoration(
+                                 color: theme.colorScheme.primary.withValues(
+                                   alpha: 0.15,
+                                 ),
+                                 borderRadius: BorderRadius.circular(4),
+                               ),
+                               child: Text(
+                                 'Best Match',
+                                 style: TextStyle(
+                                   fontSize: 11,
+                                   fontWeight: FontWeight.w600,
+                                   color: theme.colorScheme.primary,
+                                 ),
+                               ),
+                             ),
+                           ),
+                         Text(
+                           plant.commonName,
+                           style: const TextStyle(
+                             fontSize: 15,
+                             fontWeight: FontWeight.w600,
+                           ),
+                           maxLines: 1,
+                           overflow: TextOverflow.ellipsis,
+                         ),
+                         const SizedBox(height: 2),
+                         Text(
+                           plant.scientificName,
+                           style: TextStyle(
+                             fontSize: 12,
+                             fontStyle: FontStyle.italic,
+                             color: theme.colorScheme.onSurfaceVariant,
+                           ),
+                           maxLines: 1,
+                           overflow: TextOverflow.ellipsis,
+                         ),
+                       ],
+                     ),
+                   ),
+                 ],
+               ),
+               Positioned(
+                 top: 0,
+                 right: 0,
+                 child: ConfidenceBadgeWidget(
+                   score: plant.score,
+                   size: 40,
+                   dotOnly: true,
+                 ),
+               ),
+             ],
+           ),
+         ),
+       ),
+     );
+   }
 
    Widget _buildFailedResult(BuildContext context, ThemeData theme) {
     return EmptyStateWidget(
