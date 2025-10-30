@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:plantyze/models/saved_plant.dart';
 import 'package:plantyze/services/garden_service.dart';
+import 'package:plantyze/services/dialog_service.dart';
+import 'package:plantyze/services/snackbar_service.dart';
+import 'package:plantyze/services/navigation_service.dart';
 import 'package:plantyze/screens/plant_details_screen.dart';
 import 'package:plantyze/screens/base_screen.dart';
+import 'package:plantyze/widgets/plant_image_widget.dart';
+import 'package:plantyze/widgets/empty_state_widget.dart';
 
 class GardenScreen extends StatefulWidget {
   final GardenService gardenService;
@@ -43,93 +48,49 @@ class _GardenScreenState extends State<GardenScreen> {
     });
   }
 
-  void _showDeleteDialog(SavedPlant savedPlant) {
-    final errorColor = Theme.of(context).colorScheme.error;
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Remove Plant'),
-        content: Text(
+   void _showDeleteDialog(SavedPlant savedPlant) {
+    DialogService.showConfirmDialog(
+      context,
+      title: 'Remove Plant',
+      message:
           'Are you sure you want to remove "${savedPlant.plant.commonName}" from your garden?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              if (!mounted) return;
-              final navigator = Navigator.of(context);
-              final messenger = ScaffoldMessenger.of(context);
-              navigator.pop();
-              final success = await widget.gardenService.removePlant(
-                savedPlant.id,
-              );
-              if (mounted && success) {
-                messenger.showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      '${savedPlant.plant.commonName} removed from garden',
-                    ),
-                    backgroundColor: errorColor,
-                  ),
-                );
-              }
-            },
-            style: TextButton.styleFrom(foregroundColor: errorColor),
-            child: const Text('Remove'),
-          ),
-        ],
-      ),
-    );
+      confirmLabel: 'Remove',
+      cancelLabel: 'Cancel',
+    ).then((confirmed) async {
+      if (!confirmed || !mounted) return;
+      final success = await widget.gardenService.removePlant(savedPlant.id);
+      if (mounted && success) {
+        SnackBarService.showSuccess(
+          context,
+          '${savedPlant.plant.commonName} removed from garden',
+        );
+      }
+    });
   }
 
-  void _showClearGardenDialog() {
-    final errorColor = Theme.of(context).colorScheme.error;
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Clear Garden'),
-        content: const Text(
+   void _showClearGardenDialog() {
+    DialogService.showConfirmDialog(
+      context,
+      title: 'Clear Garden',
+      message:
           'Are you sure you want to remove all plants from your garden? This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              if (!mounted) return;
-              final navigator = Navigator.of(context);
-              final messenger = ScaffoldMessenger.of(context);
-              navigator.pop();
-              await widget.gardenService.clearGarden();
-              if (mounted) {
-                messenger.showSnackBar(
-                  SnackBar(
-                    content: const Text('Garden cleared'),
-                    backgroundColor: errorColor,
-                  ),
-                );
-              }
-            },
-            style: TextButton.styleFrom(foregroundColor: errorColor),
-            child: const Text('Clear All'),
-          ),
-        ],
-      ),
-    );
+      confirmLabel: 'Clear All',
+      cancelLabel: 'Cancel',
+    ).then((confirmed) async {
+      if (!confirmed || !mounted) return;
+      await widget.gardenService.clearGarden();
+      if (mounted) {
+        SnackBarService.showSuccess(context, 'Garden cleared');
+      }
+    });
   }
 
   void _navigateToPlantDetails(SavedPlant savedPlant) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => PlantDetailsScreen(
-          plant: savedPlant.plant,
-          gardenService: widget.gardenService,
-        ),
+    NavigationService.push(
+      context,
+      PlantDetailsScreen(
+        plant: savedPlant.plant,
+        gardenService: widget.gardenService,
       ),
     );
   }
@@ -219,63 +180,22 @@ class _GardenScreenState extends State<GardenScreen> {
     );
   }
 
-  Widget _buildEmptyState(ThemeData theme) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: theme.colorScheme.primaryContainer.withValues(
-                  alpha: 0.2,
-                ),
-              ),
-              child: Icon(
-                Icons.eco_outlined,
-                size: 80,
-                color: theme.colorScheme.primary,
-              ),
-            ),
-            const SizedBox(height: 32),
-            Text(
-              'Your Garden is Empty',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Start identifying plants and save them to your garden to build your personal plant collection.',
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                height: 1.5,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton.icon(
-              onPressed: () => context.navigateToTab(1),
-              icon: const Icon(Icons.camera_alt),
-              label: const Text('Identify Plants'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+   Widget _buildEmptyState(ThemeData theme) {
+    return EmptyStateWidget(
+      icon: Icons.eco_outlined,
+      iconColor: theme.colorScheme.primary,
+      backgroundColor:
+          theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
+      title: 'Your Garden is Empty',
+      description:
+          'Start identifying plants and save them to your garden to build your personal plant collection.',
+      buttonLabel: 'Identify Plants',
+      buttonIcon: Icons.camera_alt,
+      onButtonPressed: () => context.navigateToTab(1),
     );
   }
 
-  Widget _buildListPlantItem(ThemeData theme, SavedPlant savedPlant) {
+   Widget _buildListPlantItem(ThemeData theme, SavedPlant savedPlant) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Material(
@@ -288,28 +208,12 @@ class _GardenScreenState extends State<GardenScreen> {
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    width: 60,
-                    height: 60,
-                    color: theme.colorScheme.surfaceContainerHighest,
-                    child: savedPlant.plant.images.isNotEmpty
-                        ? Image.network(
-                            savedPlant.plant.images.first,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Icon(
-                                Icons.local_florist,
-                                color: theme.colorScheme.primary,
-                              );
-                            },
-                          )
-                        : Icon(
-                            Icons.local_florist,
-                            color: theme.colorScheme.primary,
-                          ),
-                  ),
+                PlantImageWidget(
+                  imageUrl: savedPlant.plant.images.isNotEmpty
+                      ? savedPlant.plant.images.first
+                      : '',
+                  width: 60,
+                  height: 60,
                 ),
                 const SizedBox(width: 12),
                 Expanded(

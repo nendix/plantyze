@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:plantyze/models/plant.dart';
 import 'package:plantyze/services/garden_service.dart';
+import 'package:plantyze/services/snackbar_service.dart';
 import 'package:plantyze/config/theme_config.dart';
+import 'package:plantyze/widgets/plant_image_widget.dart';
 
 class PlantDetailsScreen extends StatefulWidget {
   final Plant plant;
@@ -21,7 +22,7 @@ class PlantDetailsScreen extends StatefulWidget {
 class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
   bool _isSaving = false;
 
-  Future<void> _savePlantToGarden() async {
+   Future<void> _savePlantToGarden() async {
     if (_isSaving) return;
 
     setState(() {
@@ -32,52 +33,23 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
       final success = await widget.gardenService.savePlant(widget.plant);
 
       if (mounted) {
-        final theme = Theme.of(context);
         if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  Icon(Icons.check_circle, color: theme.colorScheme.onPrimary),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text('${widget.plant.commonName} saved to your garden!'),
-                  ),
-                ],
-              ),
-              backgroundColor: theme.colorScheme.primary,
-              behavior: SnackBarBehavior.floating,
-            ),
+          SnackBarService.showSuccess(
+            context,
+            '${widget.plant.commonName} saved to your garden!',
           );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  Icon(Icons.info, color: theme.colorScheme.onSecondary),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      '${widget.plant.commonName} is already in your garden',
-                    ),
-                  ),
-                ],
-              ),
-              backgroundColor: theme.colorScheme.secondary,
-              behavior: SnackBarBehavior.floating,
-            ),
+          SnackBarService.showInfo(
+            context,
+            '${widget.plant.commonName} is already in your garden',
           );
         }
       }
     } catch (e) {
       if (mounted) {
-        final theme = Theme.of(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to save plant: ${e.toString()}'),
-            backgroundColor: theme.colorScheme.error,
-            behavior: SnackBarBehavior.floating,
-          ),
+        SnackBarService.showError(
+          context,
+          'Failed to save plant: ${e.toString()}',
         );
       }
     } finally {
@@ -121,7 +93,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
     );
   }
 
-  Widget _buildAppBar(BuildContext context, ThemeData theme) {
+   Widget _buildAppBar(BuildContext context, ThemeData theme) {
     return SliverAppBar(
       expandedHeight: 300,
       pinned: true,
@@ -142,35 +114,12 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
         background: Stack(
           fit: StackFit.expand,
           children: [
-            widget.plant.imageUrl.isNotEmpty
-                ? CachedNetworkImage(
-                    imageUrl: widget.plant.imageUrl,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      color: theme.colorScheme.surfaceContainerHighest,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      color: theme.colorScheme.surfaceContainerHighest,
-                      child: Icon(
-                        Icons.local_florist,
-                        size: 80,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                  )
-                : Container(
-                    color: theme.colorScheme.surfaceContainerHighest,
-                    child: Icon(
-                      Icons.local_florist,
-                      size: 80,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
+            PlantImageWidget(
+              imageUrl: widget.plant.imageUrl,
+              width: double.infinity,
+              height: double.infinity,
+              borderRadius: 0,
+            ),
           ],
         ),
       ),
@@ -239,7 +188,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
               ),
             ),
           ),
-          if (widget.plant.similarImages.isNotEmpty) ...[
+           if (widget.plant.similarImages.isNotEmpty) ...[
             const SizedBox(height: 16),
             _buildSection(
               theme,
@@ -253,30 +202,11 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                   itemBuilder: (context, index) {
                     return Padding(
                       padding: const EdgeInsets.only(right: 8.0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: CachedNetworkImage(
-                          imageUrl: widget.plant.similarImages[index],
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
-                            color: theme.colorScheme.surfaceContainerHighest,
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: theme.colorScheme.primary,
-                              ),
-                            ),
-                          ),
-                          errorWidget: (context, url, error) => Container(
-                            color: theme.colorScheme.surfaceContainerHighest,
-                            child: Icon(
-                              Icons.error,
-                              color: theme.colorScheme.error,
-                            ),
-                          ),
-                        ),
+                      child: PlantImageWidget(
+                        imageUrl: widget.plant.similarImages[index],
+                        width: 100,
+                        height: 100,
+                        borderRadius: 12,
                       ),
                     );
                   },

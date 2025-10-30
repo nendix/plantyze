@@ -25,21 +25,22 @@ void main() async {
   final themeService = ThemeService();
   final gardenService = GardenService();
 
-  await Future.wait([
-    themeService.initialize(),
-    gardenService.initialize(),
-  ]);
+  await Future.wait([themeService.initialize(), gardenService.initialize()]);
 
   final cameraService = CameraService();
   final connectivityService = ConnectivityService();
-  final plantApiService = PlantApiService(connectivityService: connectivityService);
+  final plantApiService = PlantApiService(
+    connectivityService: connectivityService,
+  );
 
-  runApp(PlantyzeApp(
-    themeService: themeService,
-    gardenService: gardenService,
-    cameraService: cameraService,
-    plantApiService: plantApiService,
-  ));
+  runApp(
+    PlantyzeApp(
+      themeService: themeService,
+      gardenService: gardenService,
+      cameraService: cameraService,
+      plantApiService: plantApiService,
+    ),
+  );
 }
 
 class PlantyzeApp extends StatefulWidget {
@@ -73,16 +74,14 @@ class _PlantyzeAppState extends State<PlantyzeApp> {
       listenable: widget.themeService,
       builder: (context, child) {
         return MaterialApp(
-          title: 'Plantyze',
+          title: 'plantyze',
           debugShowCheckedModeBanner: false,
           theme: ThemeConfig.lightTheme,
           darkTheme: ThemeConfig.darkTheme,
           themeMode: widget.themeService.materialThemeMode,
           home: BaseScreen(
             screens: [
-              GardenScreen(
-                gardenService: widget.gardenService,
-              ),
+              GardenScreen(gardenService: widget.gardenService),
               CameraScreen(
                 gardenService: widget.gardenService,
                 cameraService: widget.cameraService,

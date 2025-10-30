@@ -4,6 +4,8 @@ import 'package:plantyze/screens/result_screen.dart';
 import 'package:plantyze/services/camera_service.dart';
 import 'package:plantyze/services/plant_api_service.dart';
 import 'package:plantyze/services/garden_service.dart';
+import 'package:plantyze/services/dialog_service.dart';
+import 'package:plantyze/services/navigation_service.dart';
 import 'package:plantyze/screens/base_screen.dart';
 import 'package:plantyze/widgets/camera_preview_widget.dart';
 
@@ -92,7 +94,7 @@ class _CameraScreenState extends State<CameraScreen>
     }
   }
 
-  Future<void> _takePicture() async {
+   Future<void> _takePicture() async {
     if (_isCapturing) return;
 
     setState(() {
@@ -104,12 +106,11 @@ class _CameraScreenState extends State<CameraScreen>
       final result = await _plantApiService.identifyPlant(imagePath);
 
       if (mounted) {
-        await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => ResultScreen(
-              result: result,
-              gardenService: widget.gardenService,
-            ),
+        await NavigationService.push(
+          context,
+          ResultScreen(
+            result: result,
+            gardenService: widget.gardenService,
           ),
         );
 
@@ -131,23 +132,15 @@ class _CameraScreenState extends State<CameraScreen>
     }
   }
 
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Error'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+   void _showErrorDialog(String message) {
+    DialogService.showErrorDialog(
+      context,
+      title: 'Error',
+      message: message,
     );
   }
 
-  Future<void> _pickImageFromGallery() async {
+   Future<void> _pickImageFromGallery() async {
     setState(() {
       _isCapturing = true;
     });
@@ -160,12 +153,11 @@ class _CameraScreenState extends State<CameraScreen>
         final result = await _plantApiService.identifyPlant(image.path);
 
         if (mounted) {
-          await Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => ResultScreen(
-                result: result,
-                gardenService: widget.gardenService,
-              ),
+          await NavigationService.push(
+            context,
+            ResultScreen(
+              result: result,
+              gardenService: widget.gardenService,
             ),
           );
 

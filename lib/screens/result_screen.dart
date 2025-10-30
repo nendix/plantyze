@@ -4,8 +4,10 @@ import 'package:plantyze/models/identification_result.dart';
 import 'package:plantyze/models/plant.dart';
 import 'package:plantyze/screens/plant_details_screen.dart';
 import 'package:plantyze/services/garden_service.dart';
-import 'package:plantyze/config/theme_config.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:plantyze/services/navigation_service.dart';
+import 'package:plantyze/widgets/plant_image_widget.dart';
+import 'package:plantyze/widgets/empty_state_widget.dart';
+import 'package:plantyze/widgets/confidence_badge_widget.dart';
 
 class ResultScreen extends StatefulWidget {
   final IdentificationResult result;
@@ -31,7 +33,7 @@ class _ResultScreenState extends State<ResultScreen> {
         title: const Text('Results'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => NavigationService.pop(context),
         ),
       ),
       body: widget.result.isSuccessful
@@ -60,39 +62,42 @@ class _ResultScreenState extends State<ResultScreen> {
                 File(widget.result.capturedImagePath),
                 fit: BoxFit.cover,
               ),
-               Positioned(
-                 bottom: 16,
-                 right: 16,
-                 child: Badge(
-                   label: Text(
-                     widget.result.plants.length.toString(),
-                     style: TextStyle(
-                       color: theme.colorScheme.onPrimary,
-                       fontWeight: FontWeight.bold,
-                     ),
-                   ),
-                   backgroundColor: theme.colorScheme.primary,
-                   child: Container(
-                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                     decoration: BoxDecoration(
-                       color: theme.colorScheme.surface.withValues(alpha: 0.9),
-                       borderRadius: BorderRadius.circular(8),
-                       border: Border.all(
-                         color: theme.colorScheme.primary.withValues(alpha: 0.3),
-                         width: 1,
-                       ),
-                     ),
-                     child: Text(
-                       '${widget.result.plants.length == 1 ? 'match' : 'matches'} found',
-                       style: TextStyle(
-                         color: theme.colorScheme.onSurface,
-                         fontSize: 13,
-                         fontWeight: FontWeight.w500,
-                       ),
-                     ),
-                   ),
-                 ),
-               ),
+              Positioned(
+                bottom: 16,
+                right: 16,
+                child: Badge(
+                  label: Text(
+                    widget.result.plants.length.toString(),
+                    style: TextStyle(
+                      color: theme.colorScheme.onPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  backgroundColor: theme.colorScheme.primary,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface.withValues(alpha: 0.9),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      '${widget.result.plants.length == 1 ? 'match' : 'matches'} found',
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurface,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -110,10 +115,12 @@ class _ResultScreenState extends State<ResultScreen> {
     );
   }
 
-  Widget _buildPlantItem(
-      BuildContext context, ThemeData theme, Plant plant, int index) {
-    final confidenceColor = ThemeConfig.getConfidenceColor(plant.score);
-
+   Widget _buildPlantItem(
+    BuildContext context,
+    ThemeData theme,
+    Plant plant,
+    int index,
+  ) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: InkWell(
@@ -123,46 +130,10 @@ class _ResultScreenState extends State<ResultScreen> {
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: plant.imageUrl.isNotEmpty
-                    ? CachedNetworkImage(
-                        imageUrl: plant.imageUrl,
-                        width: 70,
-                        height: 70,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(
-                          width: 70,
-                          height: 70,
-                          color: theme.colorScheme.surfaceContainerHighest,
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
-                        ),
-                        errorWidget: (context, url, error) => Container(
-                          width: 70,
-                          height: 70,
-                          color: theme.colorScheme.surfaceContainerHighest,
-                          child: Icon(
-                            Icons.local_florist,
-                            color: theme.colorScheme.primary,
-                            size: 32,
-                          ),
-                        ),
-                      )
-                    : Container(
-                        width: 70,
-                        height: 70,
-                        color: theme.colorScheme.surfaceContainerHighest,
-                        child: Icon(
-                          Icons.local_florist,
-                          color: theme.colorScheme.primary,
-                          size: 32,
-                        ),
-                      ),
+              PlantImageWidget(
+                imageUrl: plant.imageUrl,
+                width: 70,
+                height: 70,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -174,7 +145,9 @@ class _ResultScreenState extends State<ResultScreen> {
                         padding: const EdgeInsets.only(bottom: 4),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2),
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: theme.colorScheme.primary.withValues(
                               alpha: 0.15,
@@ -215,39 +188,11 @@ class _ResultScreenState extends State<ResultScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: confidenceColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: confidenceColor.withValues(alpha: 0.3),
-                    width: 1,
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '${(plant.score * 100).toStringAsFixed(0)}%',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: confidenceColor,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: confidenceColor,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ],
-                ),
+              ConfidenceBadgeWidget(
+                score: plant.score,
+                size: 56,
+                showLabel: false,
+                showPercentage: true,
               ),
             ],
           ),
@@ -256,107 +201,41 @@ class _ResultScreenState extends State<ResultScreen> {
     );
   }
 
-  Widget _buildFailedResult(BuildContext context, ThemeData theme) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.errorContainer,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.error_outline,
-                size: 64,
-                color: theme.colorScheme.error,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Identification Failed',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              widget.result.errorMessage ?? 'Unknown error occurred',
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            FilledButton.icon(
-              onPressed: () => Navigator.of(context).pop(),
-              icon: const Icon(Icons.camera_alt),
-              label: const Text('Try Again'),
-            ),
-          ],
-        ),
-      ),
+   Widget _buildFailedResult(BuildContext context, ThemeData theme) {
+    return EmptyStateWidget(
+      icon: Icons.error_outline,
+      iconColor: theme.colorScheme.error,
+      backgroundColor: theme.colorScheme.errorContainer,
+      title: 'Identification Failed',
+      description:
+          widget.result.errorMessage ?? 'Unknown error occurred',
+      buttonLabel: 'Try Again',
+      buttonIcon: Icons.camera_alt,
+      onButtonPressed: () => NavigationService.pop(context),
     );
   }
 
-  Widget _buildNoResultsFound(BuildContext context, ThemeData theme) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.tertiaryContainer,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.search_off,
-                size: 64,
-                color: theme.colorScheme.tertiary,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'No Plants Identified',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'We couldn\'t identify any plants in this image. Try taking a clearer photo or from a different angle.',
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            FilledButton.icon(
-              onPressed: () => Navigator.of(context).pop(),
-              icon: const Icon(Icons.camera_alt),
-              label: const Text('Try Again'),
-            ),
-          ],
-        ),
-      ),
+   Widget _buildNoResultsFound(BuildContext context, ThemeData theme) {
+    return EmptyStateWidget(
+      icon: Icons.search_off,
+      iconColor: theme.colorScheme.tertiary,
+      backgroundColor: theme.colorScheme.tertiaryContainer,
+      title: 'No Plants Identified',
+      description:
+          'We couldn\'t identify any plants in this image. Try taking a clearer photo or from a different angle.',
+      buttonLabel: 'Try Again',
+      buttonIcon: Icons.camera_alt,
+      onButtonPressed: () => NavigationService.pop(context),
     );
   }
 
   void _navigateToPlantDetails(BuildContext context, Plant plant) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => PlantDetailsScreen(
-          plant: plant,
-          gardenService: widget.gardenService,
-        ),
+    NavigationService.push(
+      context,
+      PlantDetailsScreen(
+        plant: plant,
+        gardenService: widget.gardenService,
       ),
     );
   }
 }
-
