@@ -106,11 +106,9 @@ class PlantApiService {
         fileSize,
         filename: 'plant_image.jpg',
       );
-      request.files.add(multipartFile);
+       request.files.add(multipartFile);
 
-
-
-      // Set request headers
+       // Set request headers
       request.headers.addAll({
         'User-Agent': 'Plantyze/1.0.0',
         'Accept': 'application/json',

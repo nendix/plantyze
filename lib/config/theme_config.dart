@@ -1,28 +1,39 @@
 import 'package:flutter/material.dart';
 
 class ThemeConfig {
-  static const Color _primaryLight = Color(0xFFa7c4a0);
-  static const Color _primaryDark = Color(0xFF9ec49a);
-  
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: _primaryLight,
-        brightness: Brightness.light,
-      ),
       fontFamily: 'Poppins',
+      brightness: Brightness.light,
     );
   }
-  
+
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: _primaryDark,
-        brightness: Brightness.dark,
-      ),
       fontFamily: 'Poppins',
+      brightness: Brightness.dark,
     );
+  }
+
+  static Color getConfidenceColor(double confidence) {
+    if (confidence >= 0.6) {
+      return Colors.green.shade600;
+    } else if (confidence >= 0.3) {
+      return Colors.amber.shade600;
+    } else {
+      return Colors.red.shade600;
+    }
+  }
+
+  static String getConfidenceLabel(double confidence) {
+    if (confidence >= 0.6) {
+      return 'High';
+    } else if (confidence >= 0.3) {
+      return 'Medium';
+    } else {
+      return 'Low';
+    }
   }
 }

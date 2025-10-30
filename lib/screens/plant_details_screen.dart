@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:plantyze/models/plant.dart';
 import 'package:plantyze/services/garden_service.dart';
+import 'package:plantyze/config/theme_config.dart';
 
 class PlantDetailsScreen extends StatefulWidget {
   final Plant plant;
@@ -31,19 +32,20 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
       final success = await widget.gardenService.savePlant(widget.plant);
 
       if (mounted) {
+        final theme = Theme.of(context);
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Row(
                 children: [
-                  const Icon(Icons.eco, color: Colors.white),
+                  Icon(Icons.check_circle, color: theme.colorScheme.onPrimary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text('${widget.plant.commonName} saved to your garden!'),
                   ),
                 ],
               ),
-              backgroundColor: Colors.green[600],
+              backgroundColor: theme.colorScheme.primary,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -52,7 +54,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
             SnackBar(
               content: Row(
                 children: [
-                  const Icon(Icons.info, color: Colors.white),
+                  Icon(Icons.info, color: theme.colorScheme.onSecondary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -61,7 +63,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                   ),
                 ],
               ),
-              backgroundColor: Colors.orange[600],
+              backgroundColor: theme.colorScheme.secondary,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -69,10 +71,11 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final theme = Theme.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to save plant: ${e.toString()}'),
-            backgroundColor: Colors.red[600],
+            backgroundColor: theme.colorScheme.error,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -88,11 +91,13 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          _buildAppBar(context),
-          SliverToBoxAdapter(child: _buildBody(context)),
+          _buildAppBar(context, theme),
+          SliverToBoxAdapter(child: _buildBody(context, theme)),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -101,209 +106,246 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
             ? const SizedBox(
                 width: 20,
                 height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
               )
-            : const Icon(Icons.eco),
-        label: Text(_isSaving ? 'Saving...' : 'Save to Garden'),
+            : Icon(
+                widget.gardenService.isPlantSaved(widget.plant)
+                    ? Icons.check_circle
+                    : Icons.add,
+              ),
+        label: Text(_isSaving ? 'Saving...' : widget.gardenService.isPlantSaved(widget.plant) ? 'Saved' : 'Save to Garden'),
         backgroundColor: widget.gardenService.isPlantSaved(widget.plant)
-            ? Colors.green[600]
-            : null,
+            ? theme.colorScheme.primary
+            : theme.colorScheme.primary,
       ),
     );
   }
 
-  Widget _buildAppBar(BuildContext context) {
+  Widget _buildAppBar(BuildContext context, ThemeData theme) {
     return SliverAppBar(
-      expandedHeight: 250,
+      expandedHeight: 300,
       pinned: true,
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
           widget.plant.commonName,
           style: const TextStyle(
-            color: Colors.white,
             fontWeight: FontWeight.bold,
             shadows: [
               Shadow(
-                blurRadius: 10.0,
-                color: Colors.black54,
-                offset: Offset(0, 2),
+                blurRadius: 8.0,
+                color: Colors.black87,
+                offset: Offset(0, 1),
               ),
             ],
           ),
         ),
-        background: Hero(
-          tag: 'plant_image_${widget.plant.id}',
-          child:
-              widget.plant.imageUrl.isNotEmpty
-                  ? CachedNetworkImage(
+        background: Stack(
+          fit: StackFit.expand,
+          children: [
+            widget.plant.imageUrl.isNotEmpty
+                ? CachedNetworkImage(
                     imageUrl: widget.plant.imageUrl,
                     fit: BoxFit.cover,
-                    placeholder:
-                        (context, url) => Container(
-                          color: Colors.grey[300],
-                          child: const Center(
-                            child: CircularProgressIndicator(),
-                          ),
+                    placeholder: (context, url) => Container(
+                      color: theme.colorScheme.surfaceContainerHighest,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: theme.colorScheme.primary,
                         ),
-                    errorWidget:
-                        (context, url, error) => Container(
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.error),
-                        ),
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      color: theme.colorScheme.surfaceContainerHighest,
+                      child: Icon(
+                        Icons.local_florist,
+                        size: 80,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
                   )
-                  : Container(
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.image_not_supported, size: 50),
+                : Container(
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    child: Icon(
+                      Icons.local_florist,
+                      size: 80,
+                      color: theme.colorScheme.primary,
+                    ),
                   ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildBody(BuildContext context) {
+  Widget _buildBody(BuildContext context, ThemeData theme) {
+    final confidenceColor = ThemeConfig.getConfidenceColor(widget.plant.probability);
+    final confidenceLabel = ThemeConfig.getConfidenceLabel(widget.plant.probability);
+    
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Scientific name
-          const Text(
-            'Scientific Name',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.black54,
+          _buildSection(
+            theme,
+            title: 'Scientific Classification',
+            icon: Icons.science,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildInfoRow('Scientific Name', widget.plant.scientificName, theme, isItalic: true),
+                const SizedBox(height: 16),
+                _buildInfoRow('Family', widget.plant.family, theme),
+                const SizedBox(height: 16),
+                _buildInfoRow('Common Names', widget.plant.commonNames.join(', '), theme),
+              ],
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            widget.plant.scientificName,
-            style: const TextStyle(fontSize: 20, fontStyle: FontStyle.italic),
-          ),
-
-          const Divider(height: 32),
-
-          // Family
-          const Text(
-            'Family',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.black54,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(widget.plant.family, style: const TextStyle(fontSize: 18)),
-
-          const Divider(height: 32),
-
-          // Confidence level
-          const Text(
-            'Identification Confidence',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.black54,
-            ),
-          ),
-          const SizedBox(height: 8),
-          LinearProgressIndicator(
-            value: widget.plant.probability,
-            backgroundColor: Colors.grey[200],
-            color: _getConfidenceColor(widget.plant.probability),
-            minHeight: 10,
-            borderRadius: BorderRadius.circular(5),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '${(widget.plant.probability * 100).toStringAsFixed(1)}%',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: _getConfidenceColor(widget.plant.probability),
-            ),
-          ),
-
-          const Divider(height: 32),
-
-          // Description (if available) or alternative text
-          const Text(
-            'About',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.black54,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            widget.plant.description.isNotEmpty
-                ? widget.plant.description
-                : 'No additional information available for this plant. You can search online for more details about ${widget.plant.commonName} (${widget.plant.scientificName}).',
-            style: const TextStyle(fontSize: 16),
-          ),
-
-          const SizedBox(height: 32),
-
-          // Similar images if available
-          if (widget.plant.similarImages.isNotEmpty) ...[
-            const Text(
-              'Similar Images',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.black54,
+          const SizedBox(height: 16),
+          _buildSection(
+            theme,
+            title: 'Identification Confidence',
+            icon: Icons.analytics,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: confidenceColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: confidenceColor.withValues(alpha: 0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: confidenceColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${(widget.plant.probability * 100).toStringAsFixed(1)}% - $confidenceLabel',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: confidenceColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 120,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: widget.plant.similarImages.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: CachedNetworkImage(
-                        imageUrl: widget.plant.similarImages[index],
-                        width: 120,
-                        height: 120,
-                        fit: BoxFit.cover,
-                        placeholder:
-                            (context, url) => Container(
-                              color: Colors.grey[300],
-                              child: const Center(
-                                child: CircularProgressIndicator(),
+          ),
+          if (widget.plant.similarImages.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _buildSection(
+              theme,
+              title: 'Similar Images',
+              icon: Icons.photo_library,
+              child: SizedBox(
+                height: 100,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: widget.plant.similarImages.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: CachedNetworkImage(
+                          imageUrl: widget.plant.similarImages[index],
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            color: theme.colorScheme.surfaceContainerHighest,
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: theme.colorScheme.primary,
                               ),
                             ),
-                        errorWidget:
-                            (context, url, error) => Container(
-                              color: Colors.grey[300],
-                              child: const Icon(Icons.error),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            color: theme.colorScheme.surfaceContainerHighest,
+                            child: Icon(
+                              Icons.error,
+                              color: theme.colorScheme.error,
                             ),
+                          ),
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
           ],
-
-          const SizedBox(height: 32),
+          const SizedBox(height: 80),
         ],
       ),
     );
   }
 
-  Color _getConfidenceColor(double confidence) {
-    if (confidence >= 0.75) {
-      return Colors.green;
-    } else if (confidence >= 0.5) {
-      return Colors.orange;
-    } else {
-      return Colors.red;
-    }
+  Widget _buildSection(
+    ThemeData theme, {
+    required String title,
+    required IconData icon,
+    required Widget child,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: theme.colorScheme.primary,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.primary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        child,
+      ],
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value, ThemeData theme, {bool isItalic = false}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 120,
+          child: Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

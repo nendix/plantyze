@@ -46,83 +46,75 @@ class _BaseScreenState extends State<BaseScreen> {
       ),
       bottomNavigationBar: _currentTab == 1 
           ? null 
-          : Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
-              ),
-              child: BottomNavigationBar(
-                currentIndex: _currentTab,
-                onTap: _onTabChanged,
-                type: BottomNavigationBarType.fixed,
-                backgroundColor: Theme.of(context).colorScheme.surface,
-                selectedItemColor: Theme.of(context).colorScheme.primary,
-                unselectedItemColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                selectedLabelStyle: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12,
+          : Padding(
+              padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-                unselectedLabelStyle: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 12,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _NavItem(
+                      icon: Icons.eco,
+                      isActive: _currentTab == 0,
+                      onTap: () => _onTabChanged(0),
+                    ),
+                    _NavItem(
+                      icon: Icons.camera_alt,
+                      isActive: _currentTab == 1,
+                      onTap: () => _onTabChanged(1),
+                    ),
+                    _NavItem(
+                      icon: Icons.settings,
+                      isActive: _currentTab == 2,
+                      onTap: () => _onTabChanged(2),
+                    ),
+                  ],
                 ),
-                items: [
-                  BottomNavigationBarItem(
-                    icon: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: _currentTab == 0
-                          ? BoxDecoration(
-                              color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                              borderRadius: BorderRadius.circular(12),
-                            )
-                          : null,
-                      child: Icon(
-                        _currentTab == 0 ? Icons.eco : Icons.eco_outlined,
-                        size: 24,
-                      ),
-                    ),
-                    label: 'Garden',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: _currentTab == 1
-                          ? BoxDecoration(
-                              color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                              borderRadius: BorderRadius.circular(12),
-                            )
-                          : null,
-                      child: Icon(
-                        _currentTab == 1 ? Icons.camera_alt : Icons.camera_alt_outlined,
-                        size: 24,
-                      ),
-                    ),
-                    label: 'Camera',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: _currentTab == 2
-                          ? BoxDecoration(
-                              color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                              borderRadius: BorderRadius.circular(12),
-                            )
-                          : null,
-                      child: Icon(
-                        _currentTab == 2 ? Icons.settings : Icons.settings_outlined,
-                        size: 24,
-                      ),
-                    ),
-                    label: 'Settings',
-                  ),
-                ],
               ),
             ),
+    );
+  }
+}
+
+class _NavItem extends StatelessWidget {
+  final IconData icon;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _NavItem({
+    required this.icon,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          child: Icon(
+            icon,
+            size: 28,
+            color: isActive
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
+        ),
+      ),
     );
   }
 }

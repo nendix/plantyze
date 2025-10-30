@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/theme_service.dart';
 
+// ignore_for_file: deprecated_member_use
 
 class ThemePickerWidget extends StatelessWidget {
   final ThemeService themeService;
@@ -34,43 +35,41 @@ class ThemePickerWidget extends StatelessWidget {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Choose Theme'),
-          content: ListenableBuilder(
-            listenable: themeService,
-            builder: (context, child) {
-              return RadioGroup<AppThemeMode>(
-                groupValue: themeService.themeMode,
-                onChanged: (AppThemeMode? value) {
-                  if (value != null) {
-                    themeService.setThemeMode(value);
-                    Navigator.of(context).pop();
-                  }
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: AppThemeMode.values.map((AppThemeMode mode) {
-                    return RadioListTile<AppThemeMode>(
-                      title: Row(
-                        children: [
-                          Icon(themeService.getThemeModeIcon(mode), size: 20),
-                          const SizedBox(width: 12),
-                          Text(themeService.getThemeModeDisplayName(mode)),
-                        ],
-                      ),
-                      value: mode,
-                    );
-                  }).toList(),
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Choose Theme'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: AppThemeMode.values.map((AppThemeMode mode) {
+                  return RadioListTile<AppThemeMode>(
+                    title: Row(
+                      children: [
+                        Icon(themeService.getThemeModeIcon(mode), size: 20),
+                        const SizedBox(width: 12),
+                        Text(themeService.getThemeModeDisplayName(mode)),
+                      ],
+                    ),
+                    value: mode,
+                    groupValue: themeService.themeMode,
+                    onChanged: (AppThemeMode? value) {
+                      if (value != null) {
+                        setDialogState(() {});
+                        themeService.setThemeMode(value);
+                        Navigator.of(context).pop();
+                      }
+                    },
+                  );
+                }).toList(),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
                 ),
-              );
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-          ],
+              ],
+            );
+          },
         );
       },
     );

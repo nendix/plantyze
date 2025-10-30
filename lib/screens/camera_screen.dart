@@ -33,7 +33,6 @@ class _CameraScreenState extends State<CameraScreen>
   @override
   void initState() {
     super.initState();
-    // Use the injected services
     _cameraService = widget.cameraService;
     _plantApiService = widget.plantApiService;
     WidgetsBinding.instance.addObserver(this);
@@ -49,7 +48,6 @@ class _CameraScreenState extends State<CameraScreen>
         });
       }
     } catch (e) {
-      // Ensure camera service is disposed if initialization fails
       await _cameraService.dispose();
       if (mounted) {
         setState(() {
@@ -62,9 +60,7 @@ class _CameraScreenState extends State<CameraScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Handle app lifecycle changes
     if (state == AppLifecycleState.inactive) {
-      // Always dispose when app goes inactive, regardless of initialization state
       _cameraService.dispose();
       if (mounted) {
         setState(() {
@@ -72,7 +68,6 @@ class _CameraScreenState extends State<CameraScreen>
         });
       }
     } else if (state == AppLifecycleState.resumed && !_isInitialized) {
-      // Only reinitialize if we're not already initialized
       _initializeCamera();
     }
   }
@@ -80,7 +75,6 @@ class _CameraScreenState extends State<CameraScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    // Ensure camera service is always disposed, even if not initialized
     _cameraService.dispose();
     super.dispose();
   }
@@ -106,10 +100,7 @@ class _CameraScreenState extends State<CameraScreen>
     });
 
     try {
-      // Take the picture
       final imagePath = await _cameraService.takePicture();
-
-      // Identify the plant
       final result = await _plantApiService.identifyPlant(imagePath);
 
       if (mounted) {
@@ -121,7 +112,7 @@ class _CameraScreenState extends State<CameraScreen>
             ),
           ),
         );
-        
+
         if (mounted) {
           await _cameraService.dispose();
           await _initializeCamera();
@@ -143,19 +134,16 @@ class _CameraScreenState extends State<CameraScreen>
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Error'),
-            content: Text(message),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('OK'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
           ),
+        ],
+      ),
     );
   }
 
@@ -169,7 +157,6 @@ class _CameraScreenState extends State<CameraScreen>
       final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
       if (image != null) {
-        // Identify the plant
         final result = await _plantApiService.identifyPlant(image.path);
 
         if (mounted) {
@@ -181,7 +168,7 @@ class _CameraScreenState extends State<CameraScreen>
               ),
             ),
           );
-          
+
           if (mounted) {
             await _cameraService.dispose();
             await _initializeCamera();
@@ -203,77 +190,128 @@ class _CameraScreenState extends State<CameraScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
         child: Stack(
           children: [
-            // Camera Preview
             if (_isInitialized && _cameraService.controller != null)
               CameraPreviewWidget(controller: _cameraService.controller!),
-
-            // UI Controls
-            Positioned(
-              top: 16,
-              left: 16,
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                color: Colors.white,
-                iconSize: 28,
-                onPressed: () => context.navigateBack(),
-              ),
-            ),
-
-            Positioned(
-              top: 16,
-              right: 16,
-              child: IconButton(
-                icon: Icon(_cameraService.isFlashOn ? Icons.flash_on : Icons.flash_off),
-                color: Colors.white,
-                iconSize: 28,
-                onPressed: _isInitialized ? _toggleFlash : null,
-              ),
-            ),
-
-            // Capture Button - Bottom center
-            Positioned(
-              bottom: 16,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: GestureDetector(
-                  onTap: _isInitialized && !_isCapturing ? _takePicture : null,
-                  child: Container(
-                    height: 80,
-                    width: 80,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.8),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 4),
-                    ),
-                    child: _isCapturing
-                        ? const CircularProgressIndicator(
-                            color: Colors.green,
-                          )
-                        : const Icon(
-                            Icons.camera_alt,
-                            size: 40,
-                            color: Colors.green,
-                          ),
-                  ),
+            if (!_isInitialized)
+              Center(
+                child: CircularProgressIndicator(
+                  color: theme.colorScheme.primary,
                 ),
               ),
-            ),
-
-            // Gallery Button - Bottom left
             Positioned(
-              bottom: 16,
-              left: 16,
-              child: IconButton(
-                icon: const Icon(Icons.photo_library),
-                color: Colors.white,
-                iconSize: 28,
-                onPressed: _isInitialized && !_isCapturing ? _pickImageFromGallery : null,
+              top: 12,
+              left: 12,
+              right: 12,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => context.navigateBack(),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        child: Icon(
+                          Icons.arrow_back,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _isInitialized ? _toggleFlash : null,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        child: Icon(
+                          _cameraService.isFlashOn ? Icons.flash_on : Icons.flash_off,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              bottom: 32,
+              left: 0,
+              right: 0,
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: _isInitialized && !_isCapturing
+                            ? _pickImageFromGallery
+                            : null,
+                        child: Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.4),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.photo_library,
+                            color: Colors.white,
+                            size: 28,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 24),
+                      GestureDetector(
+                        onTap: _isInitialized && !_isCapturing ? _takePicture : null,
+                        child: Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.3),
+                                blurRadius: 16,
+                                spreadRadius: 4,
+                              ),
+                            ],
+                          ),
+                          child: _isCapturing
+                              ? Padding(
+                                  padding: const EdgeInsets.all(20),
+                                  child: CircularProgressIndicator(
+                                    color: theme.colorScheme.primary,
+                                    strokeWidth: 3,
+                                  ),
+                                )
+                              : Icon(
+                                  Icons.camera_alt,
+                                  size: 36,
+                                  color: theme.colorScheme.primary,
+                                ),
+                        ),
+                      ),
+                      const SizedBox(width: 84),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
