@@ -28,15 +28,6 @@ class SnackBarService {
     );
   }
 
-  static void showWarning(BuildContext context, String message) {
-    _show(
-      context,
-      message,
-      Icons.warning,
-      Colors.orange,
-    );
-  }
-
   static void _show(
     BuildContext context,
     String message,
