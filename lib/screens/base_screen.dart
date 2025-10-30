@@ -46,75 +46,25 @@ class _BaseScreenState extends State<BaseScreen> {
       ),
       bottomNavigationBar: _currentTab == 1 
           ? null 
-          : Padding(
-              padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+          : NavigationBar(
+              selectedIndex: _currentTab,
+              onDestinationSelected: _onTabChanged,
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.eco),
+                  label: 'Garden',
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _NavItem(
-                      icon: Icons.eco,
-                      isActive: _currentTab == 0,
-                      onTap: () => _onTabChanged(0),
-                    ),
-                    _NavItem(
-                      icon: Icons.camera_alt,
-                      isActive: _currentTab == 1,
-                      onTap: () => _onTabChanged(1),
-                    ),
-                    _NavItem(
-                      icon: Icons.settings,
-                      isActive: _currentTab == 2,
-                      onTap: () => _onTabChanged(2),
-                    ),
-                  ],
+                NavigationDestination(
+                  icon: Icon(Icons.camera_alt),
+                  label: 'Camera',
                 ),
-              ),
+                NavigationDestination(
+                  icon: Icon(Icons.settings),
+                  label: 'Settings',
+                ),
+              ],
             ),
-    );
-  }
-}
-
-class _NavItem extends StatelessWidget {
-  final IconData icon;
-  final bool isActive;
-  final VoidCallback onTap;
-
-  const _NavItem({
-    required this.icon,
-    required this.isActive,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          child: Icon(
-            icon,
-            size: 28,
-            color: isActive
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -130,4 +80,3 @@ extension BaseScreenNavigation on BuildContext {
     state?._goBack();
   }
 }
-
