@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:plantyze/models/saved_plant.dart';
 import 'package:plantyze/services/garden_service.dart';
 import 'package:plantyze/screens/plant_details_screen.dart';
@@ -8,10 +7,7 @@ import 'package:plantyze/screens/base_screen.dart';
 class GardenScreen extends StatefulWidget {
   final GardenService gardenService;
 
-  const GardenScreen({
-    super.key, 
-    required this.gardenService,
-  });
+  const GardenScreen({super.key, required this.gardenService});
 
   @override
   State<GardenScreen> createState() => _GardenScreenState();
@@ -67,11 +63,15 @@ class _GardenScreenState extends State<GardenScreen> {
               final navigator = Navigator.of(context);
               final messenger = ScaffoldMessenger.of(context);
               navigator.pop();
-              final success = await widget.gardenService.removePlant(savedPlant.id);
+              final success = await widget.gardenService.removePlant(
+                savedPlant.id,
+              );
               if (mounted && success) {
                 messenger.showSnackBar(
                   SnackBar(
-                    content: Text('${savedPlant.plant.commonName} removed from garden'),
+                    content: Text(
+                      '${savedPlant.plant.commonName} removed from garden',
+                    ),
                     backgroundColor: errorColor,
                   ),
                 );
@@ -140,7 +140,7 @@ class _GardenScreenState extends State<GardenScreen> {
     }
     return plants.where((plant) {
       return plant.plant.commonName.toLowerCase().contains(_searchQuery) ||
-             plant.plant.scientificName.toLowerCase().contains(_searchQuery);
+          plant.plant.scientificName.toLowerCase().contains(_searchQuery);
     }).toList();
   }
 
@@ -152,7 +152,7 @@ class _GardenScreenState extends State<GardenScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Garden'),
+        title: const Text('Garden'),
         centerTitle: false,
         actions: [
           if (savedPlants.isNotEmpty)
@@ -163,7 +163,7 @@ class _GardenScreenState extends State<GardenScreen> {
             ),
         ],
       ),
-      body: savedPlants.isEmpty 
+      body: savedPlants.isEmpty
           ? _buildEmptyState(theme)
           : Column(
               children: [
@@ -183,7 +183,10 @@ class _GardenScreenState extends State<GardenScreen> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                     ),
                   ),
                 ),
@@ -204,7 +207,10 @@ class _GardenScreenState extends State<GardenScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       itemCount: filteredPlants.length,
                       itemBuilder: (context, index) {
-                        return _buildListPlantItem(theme, filteredPlants[index]);
+                        return _buildListPlantItem(
+                          theme,
+                          filteredPlants[index],
+                        );
                       },
                     ),
                   ),
@@ -224,7 +230,9 @@ class _GardenScreenState extends State<GardenScreen> {
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
+                color: theme.colorScheme.primaryContainer.withValues(
+                  alpha: 0.2,
+                ),
               ),
               child: Icon(
                 Icons.eco_outlined,
@@ -255,7 +263,10 @@ class _GardenScreenState extends State<GardenScreen> {
               icon: const Icon(Icons.camera_alt),
               label: const Text('Identify Plants'),
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
               ),
             ),
           ],
@@ -322,13 +333,6 @@ class _GardenScreenState extends State<GardenScreen> {
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        DateFormat('MMM d, yyyy').format(savedPlant.savedAt),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
                       ),
                     ],
                   ),

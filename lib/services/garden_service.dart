@@ -28,8 +28,6 @@ class GardenService extends ChangeNotifier {
             .map((json) => SavedPlant.fromJson(json as Map<String, dynamic>))
             .toList();
         
-        // Sort by saved date (newest first)
-        _savedPlants.sort((a, b) => b.savedAt.compareTo(a.savedAt));
         notifyListeners();
       }
     } catch (e) {
