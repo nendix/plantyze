@@ -221,7 +221,7 @@ class _CameraScreenState extends State<CameraScreen>
                         padding: const EdgeInsets.all(8),
                         child: Icon(
                           Icons.arrow_back,
-                          color: Colors.white,
+                          color: theme.colorScheme.onSurface,
                           size: 28,
                         ),
                       ),
@@ -236,7 +236,7 @@ class _CameraScreenState extends State<CameraScreen>
                         padding: const EdgeInsets.all(8),
                         child: Icon(
                           _cameraService.isFlashOn ? Icons.flash_on : Icons.flash_off,
-                          color: Colors.white,
+                          color: theme.colorScheme.onSurface,
                           size: 28,
                         ),
                       ),
@@ -262,16 +262,16 @@ class _CameraScreenState extends State<CameraScreen>
                           width: 60,
                           height: 60,
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
+                            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.4),
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                               width: 1.5,
                             ),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.photo_library,
-                            color: Colors.white,
+                            color: theme.colorScheme.onSurface,
                             size: 28,
                           ),
                         ),
@@ -283,7 +283,7 @@ class _CameraScreenState extends State<CameraScreen>
                           width: 80,
                           height: 80,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: theme.colorScheme.primary,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
@@ -297,14 +297,14 @@ class _CameraScreenState extends State<CameraScreen>
                               ? Padding(
                                   padding: const EdgeInsets.all(20),
                                   child: CircularProgressIndicator(
-                                    color: theme.colorScheme.primary,
+                                    color: theme.colorScheme.onPrimary,
                                     strokeWidth: 3,
                                   ),
                                 )
                               : Icon(
                                   Icons.camera_alt,
                                   size: 36,
-                                  color: theme.colorScheme.primary,
+                                  color: theme.colorScheme.onPrimary,
                                 ),
                         ),
                       ),

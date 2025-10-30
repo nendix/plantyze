@@ -60,23 +60,39 @@ class _ResultScreenState extends State<ResultScreen> {
                 File(widget.result.capturedImagePath),
                 fit: BoxFit.cover,
               ),
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  color: Colors.black87,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Text(
-                    '${widget.result.plants.length} ${widget.result.plants.length == 1 ? 'match' : 'matches'} found',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
+               Positioned(
+                 bottom: 16,
+                 right: 16,
+                 child: Badge(
+                   label: Text(
+                     widget.result.plants.length.toString(),
+                     style: TextStyle(
+                       color: theme.colorScheme.onPrimary,
+                       fontWeight: FontWeight.bold,
+                     ),
+                   ),
+                   backgroundColor: theme.colorScheme.primary,
+                   child: Container(
+                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                     decoration: BoxDecoration(
+                       color: theme.colorScheme.surface.withValues(alpha: 0.9),
+                       borderRadius: BorderRadius.circular(8),
+                       border: Border.all(
+                         color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                         width: 1,
+                       ),
+                     ),
+                     child: Text(
+                       '${widget.result.plants.length == 1 ? 'match' : 'matches'} found',
+                       style: TextStyle(
+                         color: theme.colorScheme.onSurface,
+                         fontSize: 13,
+                         fontWeight: FontWeight.w500,
+                       ),
+                     ),
+                   ),
+                 ),
+               ),
             ],
           ),
         ),

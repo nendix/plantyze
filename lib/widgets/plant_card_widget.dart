@@ -79,20 +79,18 @@ class PlantCardWidget extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: ThemeConfig.getConfidenceColor(confidenceScore),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
+                    Chip(
+                      label: Text(
                         '${(confidenceScore * 100).round()}% ${ThemeConfig.getConfidenceLabel(confidenceScore)}',
                         style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
+                      backgroundColor: ThemeConfig.getConfidenceColor(confidenceScore),
+                      labelStyle: const TextStyle(color: Colors.white),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                   ],
                 ),
