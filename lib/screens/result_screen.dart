@@ -7,7 +7,6 @@ import 'package:plantyze/services/garden_service.dart';
 import 'package:plantyze/services/navigation_service.dart';
 import 'package:plantyze/widgets/plant_image_widget.dart';
 import 'package:plantyze/widgets/empty_state_widget.dart';
-import 'package:plantyze/widgets/confidence_badge_widget.dart';
 
 class ResultScreen extends StatefulWidget {
   final IdentificationResult result;
@@ -128,76 +127,63 @@ class _ResultScreenState extends State<ResultScreen> {
          borderRadius: BorderRadius.circular(12),
          child: Padding(
            padding: const EdgeInsets.all(12),
-           child: Stack(
+           child: Row(
              children: [
-               Row(
-                 children: [
-                   PlantImageWidget(
-                     imageUrl: plant.imageUrl,
-                     width: 70,
-                     height: 70,
-                   ),
-                   const SizedBox(width: 12),
-                   Expanded(
-                     child: Column(
-                       crossAxisAlignment: CrossAxisAlignment.start,
-                       children: [
-                         if (index == 0)
-                           Padding(
-                             padding: const EdgeInsets.only(bottom: 4),
-                             child: Container(
-                               padding: const EdgeInsets.symmetric(
-                                 horizontal: 6,
-                                 vertical: 2,
-                               ),
-                               decoration: BoxDecoration(
-                                 color: theme.colorScheme.primary.withValues(
-                                   alpha: 0.15,
-                                 ),
-                                 borderRadius: BorderRadius.circular(4),
-                               ),
-                               child: Text(
-                                 'Best Match',
-                                 style: TextStyle(
-                                   fontSize: 11,
-                                   fontWeight: FontWeight.w600,
-                                   color: theme.colorScheme.primary,
-                                 ),
-                               ),
+               PlantImageWidget(
+                 imageUrl: plant.imageUrl,
+                 width: 70,
+                 height: 70,
+               ),
+               const SizedBox(width: 12),
+               Expanded(
+                 child: Column(
+                   crossAxisAlignment: CrossAxisAlignment.start,
+                   children: [
+                     if (index == 0)
+                       Padding(
+                         padding: const EdgeInsets.only(bottom: 4),
+                         child: Container(
+                           padding: const EdgeInsets.symmetric(
+                             horizontal: 6,
+                             vertical: 2,
+                           ),
+                           decoration: BoxDecoration(
+                             color: theme.colorScheme.primary.withValues(
+                               alpha: 0.15,
+                             ),
+                             borderRadius: BorderRadius.circular(4),
+                           ),
+                           child: Text(
+                             'Best Match',
+                             style: TextStyle(
+                               fontSize: 11,
+                               fontWeight: FontWeight.w600,
+                               color: theme.colorScheme.primary,
                              ),
                            ),
-                         Text(
-                           plant.commonName,
-                           style: const TextStyle(
-                             fontSize: 15,
-                             fontWeight: FontWeight.w600,
-                           ),
-                           maxLines: 1,
-                           overflow: TextOverflow.ellipsis,
                          ),
-                         const SizedBox(height: 2),
-                         Text(
-                           plant.scientificName,
-                           style: TextStyle(
-                             fontSize: 12,
-                             fontStyle: FontStyle.italic,
-                             color: theme.colorScheme.onSurfaceVariant,
-                           ),
-                           maxLines: 1,
-                           overflow: TextOverflow.ellipsis,
-                         ),
-                       ],
+                       ),
+                     Text(
+                       plant.commonName,
+                       style: const TextStyle(
+                         fontSize: 15,
+                         fontWeight: FontWeight.w600,
+                       ),
+                       maxLines: 1,
+                       overflow: TextOverflow.ellipsis,
                      ),
-                   ),
-                 ],
-               ),
-               Positioned(
-                 top: 0,
-                 right: 0,
-                 child: ConfidenceBadgeWidget(
-                   score: plant.score,
-                   size: 40,
-                   dotOnly: true,
+                     const SizedBox(height: 2),
+                     Text(
+                       plant.scientificName,
+                       style: TextStyle(
+                         fontSize: 12,
+                         fontStyle: FontStyle.italic,
+                         color: theme.colorScheme.onSurfaceVariant,
+                       ),
+                       maxLines: 1,
+                       overflow: TextOverflow.ellipsis,
+                     ),
+                   ],
                  ),
                ),
              ],

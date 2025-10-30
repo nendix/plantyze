@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:plantyze/models/plant.dart';
 import 'package:plantyze/services/garden_service.dart';
 import 'package:plantyze/services/snackbar_service.dart';
-import 'package:plantyze/config/theme_config.dart';
 import 'package:plantyze/widgets/plant_image_widget.dart';
 
 class PlantDetailsScreen extends StatefulWidget {
@@ -126,99 +125,58 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
     );
   }
 
-  Widget _buildBody(BuildContext context, ThemeData theme) {
-    final confidenceColor = ThemeConfig.getConfidenceColor(widget.plant.probability);
-    final confidenceLabel = ThemeConfig.getConfidenceLabel(widget.plant.probability);
-    
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSection(
-            theme,
-            title: 'Scientific Classification',
-            icon: Icons.science,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildInfoRow('Scientific Name', widget.plant.scientificName, theme, isItalic: true),
-                const SizedBox(height: 16),
-                _buildInfoRow('Family', widget.plant.family, theme),
-                const SizedBox(height: 16),
-                _buildInfoRow('Common Names', widget.plant.commonNames.join(', '), theme),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          _buildSection(
-            theme,
-            title: 'Identification Confidence',
-            icon: Icons.analytics,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: confidenceColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: confidenceColor.withValues(alpha: 0.3),
-                  width: 1,
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: confidenceColor,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${(widget.plant.probability * 100).toStringAsFixed(1)}% - $confidenceLabel',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: confidenceColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-           if (widget.plant.similarImages.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            _buildSection(
-              theme,
-              title: 'Similar Images',
-              icon: Icons.photo_library,
-              child: SizedBox(
-                height: 100,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: widget.plant.similarImages.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: PlantImageWidget(
-                        imageUrl: widget.plant.similarImages[index],
-                        width: 100,
-                        height: 100,
-                        borderRadius: 12,
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ],
-          const SizedBox(height: 80),
-        ],
-      ),
-    );
-  }
+   Widget _buildBody(BuildContext context, ThemeData theme) {
+     return Padding(
+       padding: const EdgeInsets.all(16.0),
+       child: Column(
+         crossAxisAlignment: CrossAxisAlignment.start,
+         children: [
+           _buildSection(
+             theme,
+             title: 'Scientific Classification',
+             icon: Icons.science,
+             child: Column(
+               crossAxisAlignment: CrossAxisAlignment.start,
+               children: [
+                 _buildInfoRow('Scientific Name', widget.plant.scientificName, theme, isItalic: true),
+                 const SizedBox(height: 16),
+                 _buildInfoRow('Family', widget.plant.family, theme),
+                 const SizedBox(height: 16),
+                 _buildInfoRow('Common Names', widget.plant.commonNames.join(', '), theme),
+               ],
+             ),
+           ),
+            if (widget.plant.similarImages.isNotEmpty) ...[
+             const SizedBox(height: 16),
+             _buildSection(
+               theme,
+               title: 'Similar Images',
+               icon: Icons.photo_library,
+               child: SizedBox(
+                 height: 100,
+                 child: ListView.builder(
+                   scrollDirection: Axis.horizontal,
+                   itemCount: widget.plant.similarImages.length,
+                   itemBuilder: (context, index) {
+                     return Padding(
+                       padding: const EdgeInsets.only(right: 8.0),
+                       child: PlantImageWidget(
+                         imageUrl: widget.plant.similarImages[index],
+                         width: 100,
+                         height: 100,
+                         borderRadius: 12,
+                       ),
+                     );
+                   },
+                 ),
+               ),
+             ),
+           ],
+           const SizedBox(height: 80),
+         ],
+       ),
+     );
+   }
 
   Widget _buildSection(
     ThemeData theme, {

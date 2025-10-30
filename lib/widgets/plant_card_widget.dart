@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:plantyze/models/plant.dart';
-import 'package:plantyze/config/theme_config.dart';
 
 class PlantCardWidget extends StatelessWidget {
   final Plant plant;
-  final double confidenceScore;
   final VoidCallback onTap;
 
   const PlantCardWidget({
     super.key,
     required this.plant,
-    required this.confidenceScore,
     required this.onTap,
   });
 
@@ -77,20 +74,6 @@ class PlantCardWidget extends StatelessWidget {
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    Chip(
-                      label: Text(
-                        '${(confidenceScore * 100).round()}% ${ThemeConfig.getConfidenceLabel(confidenceScore)}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      backgroundColor: ThemeConfig.getConfidenceColor(confidenceScore),
-                      labelStyle: const TextStyle(color: Colors.white),
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                   ],
                 ),
